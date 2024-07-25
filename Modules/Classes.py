@@ -102,6 +102,9 @@ map.capture_sector(map.fraction_list[0], 9, 9)
 map.create_clan(Fraction(name="Гойда", x=9, y=9))
 clan = map.fraction_list[1]
 clan.change_name(0, "Шкебеде сральник")
+map.create_clan(Fraction(name="ЗОВ", x=1, y=1))
+zov = map.fraction_list[2]
+zov.change_name(0, "ГОЙДА")
 for i in map.map:
     text=""
     for j in i:
@@ -110,3 +113,5 @@ for i in map.map:
 print(map.get_sector(9,8).building.building_type)
 for i in clan.warriors:
     print(i.name, clan.warriors[i])
+for i in zov.warriors:
+    print(i.name, zov.warriors[i])
