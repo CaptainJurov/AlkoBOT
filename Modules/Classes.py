@@ -108,5 +108,5 @@ for i in map.map:
         text+=j.fraction.name[0]
     print(text)
 print(map.get_sector(9,8).building.building_type)
-for i in map.fraction_list[1].warriors:
-    print(i.name)
+for i in clan.warriors:
+    print(i.name, clan.warriors[i])
