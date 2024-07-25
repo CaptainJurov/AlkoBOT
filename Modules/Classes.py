@@ -15,8 +15,10 @@ class Fraction:
         self.warriors = {self.warriors_types[0]: 10, self.warriors_types[1]: 0}
     def getbase(self):
         return (self.x, self.y)
-    def change_name(self, level: int, name: str):
+    def change_warrior_name(self, level: int, name: str):
         self.warriors_types[level].name = name
+    def change_name(self, name: str):
+        self.name = name
 
 
 class Item:
