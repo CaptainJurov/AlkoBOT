@@ -3,37 +3,77 @@ class Warrior:
     def __init__(self, name:str, power: int, price: int, entity=None):
         self.name = name
         self.power = power
-        self.entity = None
+        self.entity = entity
         self.price = price
+    def get_name(self):
+        if self.entity is None:
+            return "[b] "+self.name
+        else:
+            return "[P] "+self.name
 class Fraction:
-    def __init__(self, name: str, x: int, y: int):
+    def __init__(self, name: str, x: int, y: int, player=None):
         self.name = name
         self.x = x
         self.y = y
-        #self.warriors_types = {Warrior("Рядовой", 1, 10000): 0, Warrior("Сержант", 3, 25000): 0}
         self.warriors_types = [Warrior("Рядовой", 1, 10000), Warrior("Сержант", 3, 25000)]
         self.warriors = {self.warriors_types[0]: 10, self.warriors_types[1]: 0}
+        self.owner = player
     def getbase(self):
         return (self.x, self.y)
     def change_warrior_name(self, level: int, name: str):
-        self.warriors_types[level].name = name
+        if self.warriors_types[level].entity is None:
+            self.warriors_types[level].name = name
+            return True
+        return False
     def change_name(self, name: str):
         self.name = name
+    def naem(self, player):
+        warrior = Warrior(player.name, player.power, 10000*player.power, entity=player)
+        self.warriors_types.append(warrior)
+        self.warriors[warrior] = 1
+        player.warrior = warrior
+        player.change_playable(False)
+        player.balance += 10000*player.power
+        return warrior
+    def get_warrior(self, warrior: Warrior):
+        for i in self.warriors:
+            if i.get_name() == warrior.get_name():
+                return i
+        return False
+    def remove_warrior(self, warrior: Warrior):
+        if self.get_warrior(warrior):
+            self.warriors_types.remove(warrior)
+            del self.warriors[warrior]
+            return True
+        return False
+    def end_naem(self, player):
+        warrior = player.warrior
+        if self.get_warrior(warrior):
+
+            self.remove_warrior(warrior)
+            player.warrior = None
+            player.change_playable(True)
 
 
 class Item:
     def __init__(self, name):
         self.name = name
 class Player:
-    def __init__(self, user_id: int, fraction: Fraction):
-        self.user_id = user_id
+    def __init__(self, user_id: int, fraction: Fraction, nickname: str = None):
+        self.user_id: int = user_id
+        self.name: str = nickname
         self.x, self.y = fraction.getbase()
-        self.fraction = fraction
-        self.power = 1
-        self.balance = 100
-    def move(self, delta_x, delta_y):
+        self.fraction: Fraction = fraction
+        self.power = 2
+        self.warrior: Warrior = None
+        self.balance: int = 100
+        self.playable: bool = True
+    def move(self, delta_x: int, delta_y: int):
         self.x += delta_x
         self.y += delta_y
+    def change_playable(self, value: bool):
+        self.playable = value
+
 
 
 class Map:
@@ -65,6 +105,7 @@ class Map:
             self.building = build
         def destroy(self):
             self.building = self.Building("Ничего", None, "void")
+
     def __init__(self, size_x: int, size_y: int):
         #создание и заполнение карты
         #генерация ландшафта
@@ -89,31 +130,15 @@ class Map:
                 if self.map[y][x].fraction == fraction:
                     self.map[y][x].fraction=self.fraction_list[0]
         self.fraction_list.remove(fraction)
+    def count_sectors(self, fraction: Fraction) -> int:
+        counter: int = 0
+        for y in range(self.size_y):
+            for x in range(self.size_x):
+                if self.map[y][x].fraction == fraction: counter+=1
+        return counter
 
     def get_sector(self, x: int, y: int):
         return self.map[y][x]
     def create_clan(self, fraction: Fraction):
         self.fraction_list.append(fraction)
         self.capture_sector(fraction, fraction.x, fraction.y)
-
-
-
-#тестинг)
-map = Map(20, 10)
-map.capture_sector(map.fraction_list[0], 9, 9)
-map.create_clan(Fraction(name="Гойда", x=9, y=9))
-clan = map.fraction_list[1]
-clan.change_name(0, "Шкебеде сральник")
-map.create_clan(Fraction(name="ЗОВ", x=1, y=1))
-zov = map.fraction_list[2]
-zov.change_name(0, "ГОЙДА")
-for i in map.map:
-    text=""
-    for j in i:
-        text+=j.fraction.name[0]
-    print(text)
-print(map.get_sector(9,8).building.building_type)
-for i in clan.warriors:
-    print(i.name, clan.warriors[i])
-for i in zov.warriors:
-    print(i.name, zov.warriors[i])
