@@ -17,6 +17,9 @@ buildings = {
     "Казино": Building("Казино", "casino", 1_000_000_000),
     "Дорога": Building("Дорога", "road", 10_000_000)
 }
+buildings_for_types = {}
+for i in buildings:
+    buildings_for_types[buildings[i].type] = buildings[i]
 def get_all():
     text = ""
     for i in buildings:

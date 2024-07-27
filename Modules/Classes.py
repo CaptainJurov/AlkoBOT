@@ -84,6 +84,7 @@ class Map:
 
             def __init__(self, name: str, owner: Player, building_type: str):
                 self.name = name
+                self.firstname: str = name
                 self.owner = owner
                 self.building_type = building_type
                 self.items = []

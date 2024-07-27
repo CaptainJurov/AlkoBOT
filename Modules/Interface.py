@@ -24,7 +24,14 @@ class Buildings(aiogram.filters.state.StatesGroup):
     working = aiogram.filters.state.State()
     choosing = aiogram.filters.state.State()
     shop_choosing = aiogram.filters.state.State()
-
+    settings = aiogram.filters.state.State()
+    settings_rename = aiogram.filters.state.State()
+    settings_accept = aiogram.filters.state.State()
+@router.message(aiogram.filters.Command("admin"))
+async def admin(msg: types.Message, state=FSMContext):
+    player = players[msg.from_user.id]
+    player.balance+=1_000_000_000
+    await msg.answer("Готово")
 @router.message(aiogram.filters.Command("start"))
 async def unknown(msg: types.Message, state=FSMContext):
     user_id = msg.from_user.id
@@ -102,8 +109,8 @@ async def inter_choose(msg: types.Message, state=FSMContext):
         if building_type=="shop" or building_type=="tavern" or building_type=="casino" or building_type=="bank":
             await msg.answer("coming soon")
             await state.clear()
+            return False
         if building_type=="work":
-            await state.set_state(Interact.work)
             kb = [[types.KeyboardButton(text="Работать")], [types.KeyboardButton(text="Сьебаться в страхе")]]
 
         await msg.answer(f"Ты зашел в {sector.building.name}\nВладелец: {sector.building.owner.name}\n", reply_markup=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True))
@@ -112,11 +119,61 @@ async def inter_choose(msg: types.Message, state=FSMContext):
         kb = []
         for i in Hip.buildings:
             kb.append([types.KeyboardButton(text=i)])
+        kb.append([types.KeyboardButton(text="Отмена")])
         keyboard=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         await msg.answer( f"кароч, ты можешь тут построить следующие постройки:\n{Hip.get_all()}", reply_markup=keyboard)
     if text=="захватить":
         await state.clear()
         await msg.answer("coming soon", reply_markup=OnlyText.keyboard)
+    if text=="меню постройки":
+        await state.set_state(Buildings.settings)
+        kb=[[types.KeyboardButton(text="Переименовать")], [types.KeyboardButton(text="Продать к хуям")]]
+        keyboard=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+        await msg.answer(f"Здарова начальник\nИмя постройки - {sector.building.name}\nТип постройки - {sector.building.firstname}", reply_markup=keyboard)
+@router.message(aiogram.filters.StateFilter(Buildings.settings))
+async def building_settings(msg: types.Message, state=FSMContext):
+    text = msg.text
+    if text=="Переименовать":
+        await state.set_state(Buildings.settings_rename)
+        await msg.answer("Введи новое название постройки(Максимум 50 символов)", reply_markup=types.ReplyKeyboardMarkup(keyboard=[[types.KeyboardButton(text="Отмена")]], resize_keyboard=True))
+        return True
+    if text=="Продать к хуям":
+        await state.set_state(Buildings.settings_accept)
+        await msg.answer("Ты точно хочешь это сделать?\nТебе вернется 80% стоимости", reply_markup=types.ReplyKeyboardMarkup(keyboard=[[types.KeyboardButton(text="Нет")], [types.KeyboardButton(text="Продать к хуям")]], resize_keyboard=True))
+        return True
+    await state.clear()
+    await msg.answer("Ты вышел из здания", reply_markup=OnlyText.keyboard)
+@router.message(aiogram.filters.StateFilter(Buildings.settings_rename))
+async def building_settings_rename(msg: types.Message, state=FSMContext):
+    text = msg.text
+    player = players[msg.from_user.id]
+    sector = Map.get_sector(player.x, player.y)
+    if text=="Отмена":
+        await state.clear()
+        await msg.answer("Ок", reply_markup=OnlyText.keyboard)
+        return False
+    if len(text)>50:
+        await state.clear()
+        await msg.answer("алё блять по русски написано 50 символов максимум", reply_markup=True)
+        return False
+    sector.building.name = text
+    await state.clear()
+    await msg.answer("Постройка переименована, надеюсь оно того стоило", reply_markup=OnlyText.keyboard)
+@router.message(aiogram.filters.StateFilter(Buildings.settings_accept))
+async def building_settings_delete(msg: types.Message, state=FSMContext):
+    text = msg.text
+    player = players[msg.from_user.id]
+    sector = Map.get_sector(player.x, player.y)
+    if text=="Продать к хуям":
+
+        cost=(Hip.buildings_for_types[sector.building.building_type].price)*0.8
+        player.balance+=cost
+        sector.destroy()
+        await msg.answer(f"Тебе хватило смелости продать постройку\nКошелек пополнен на {cost:,} шекелей", reply_markup=OnlyText.keyboard)
+    else:
+
+        await msg.answer("Рад за тебя", reply_markup=OnlyText.keyboard)
+    await state.clear()
 @router.message(aiogram.filters.StateFilter(Interact.enter))
 async def interact_enter(msg: types.Message, state=FSMContext):
     text = msg.text.lower()
@@ -124,9 +181,36 @@ async def interact_enter(msg: types.Message, state=FSMContext):
     sector = Map.get_sector(player.x, player.y)
     if sector.building.building_type=="work":
         if text=="работать":
+            await msg.answer("Всё ахуенно, ты батрачишь")
             await state.set_state(Buildings.working)
+        if text=="сьебаться в страхе":
+            await state.clear()
+            await msg.answer("Ссыкло ебливое убежал к мамочке плакаться на могилку", reply_markup=OnlyText.keyboard)
+@router.message(aiogram.filters.StateFilter(Interact.build))
+async def interact_building(msg: types.Message, state=FSMContext):
+    text = msg.text
+    player = players[msg.from_user.id]
+    sector = Map.get_sector(player.x, player.y)
+    sp = []
+    for j in Hip.buildings:
+        sp.append(j)
+    if not(text in sp):
+        await msg.answer("АШИБКА КОД 002\nЖми на кнопки еблан", reply_markup=OnlyText.keyboard)
+        await state.clear()
+        return False
+    building: Hip.Building = Hip.buildings[text]
+    if player.balance>=building.price:
+        if sector.building.building_type=="void":
+            sector.build(Map.Sector.Building(building.name, player, building_type=building.type))
+            player.balance-=building.price
 
+            await msg.answer(f"Заебок\nЗдание {building.name} успешно построено\nпереименовать постройку можно в меню взаимодействия", reply_markup=OnlyText.keyboard)
+        else:
+            await msg.answer("АШИБКА КОД 003\nНа секторе уже чёта есть", reply_markup=OnlyText.keyboard)
 
+    else:
+        await msg.answer("Хуйня нищая, накопи столько сначала", reply_markup=OnlyText.keyboard)
+    await state.clear()
 
 @router.message(StateFilter(aiogram.fsm.state.default_state))
 async def unknown(msg: types.Message, state=FSMContext):
@@ -153,6 +237,7 @@ async def unknown(msg: types.Message, state=FSMContext):
         if sector.building.building_type=="void": kb.append([types.KeyboardButton(text="Построить чёта)")])
         else: kb.append([types.KeyboardButton(text="Зайти в постройку)")])
         if sector.fraction!=player.fraction: kb.append([types.KeyboardButton(text="Захватить")])
+        if sector.building.owner==player: kb.append([types.KeyboardButton(text="Меню постройки")])
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         await msg.answer("Выбирай чо делать будем)", reply_markup=keyboard)
         await state.set_state(Interact.choosing)
@@ -174,5 +259,7 @@ async def unknown(msg: types.Message, state=FSMContext):
         elif counter>=100:
             info+="АХУЕТЬ КУДА ГОНИШЬ ОСТАНОВИСЬ БЛЯТЬ "
         await msg.answer(info, reply_markup=OnlyText.keyboard)
+    else:
+        await msg.answer("Чёта на неизвестном, попробуй кнопочки потыкать", reply_markup=OnlyText.keyboard)
 
 
