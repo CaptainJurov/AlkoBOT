@@ -1,6 +1,8 @@
 import aiogram
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
+
+import Hip
 from Hip import bot, Map, players
 from Text import OnlyText
 from Modules import Classes
@@ -15,6 +17,14 @@ class Moving(aiogram.filters.state.StatesGroup):
 class Interact(aiogram.filters.state.StatesGroup):
     interact = aiogram.filters.state.State()
     choosing = aiogram.filters.state.State()
+    enter = aiogram.filters.state.State()
+    build = aiogram.filters.state.State()
+    work = aiogram.filters.state.State()
+class Buildings(aiogram.filters.state.StatesGroup):
+    working = aiogram.filters.state.State()
+    choosing = aiogram.filters.state.State()
+    shop_choosing = aiogram.filters.state.State()
+
 @router.message(aiogram.filters.Command("start"))
 async def unknown(msg: types.Message, state=FSMContext):
     user_id = msg.from_user.id
@@ -57,7 +67,7 @@ async def choosing_nickname(msg: types.Message, state=FSMContext):
     await msg.answer("Ахуительно, теперь ты готов к адской дрочильне", reply_markup=OnlyText.keyboard)
     await state.clear()
 @router.message(aiogram.filters.StateFilter(Moving.vector))
-async def Moving_choose(msg: types.Message, state=FSMContext):
+async def moving_choose(msg: types.Message, state=FSMContext):
     player = players[msg.from_user.id]
     text = msg.text
     if text.lower()=="вверх":
@@ -78,6 +88,45 @@ async def Moving_choose(msg: types.Message, state=FSMContext):
     if not(sector.building.building_type=="void"): enter+=f"\nВладелец постройки: {sector.building.owner.name}"
     await msg.answer(enter, reply_markup=OnlyText.keyboard)
     await state.clear()
+@router.message(aiogram.filters.StateFilter(Interact.choosing))
+async def inter_choose(msg: types.Message, state=FSMContext):
+    text = msg.text.lower()
+    player = players[msg.from_user.id]
+    sector = Map.get_sector(player.x, player.y)
+    if text=="зайти в постройку)":
+        await state.set_state(Interact.enter)
+        kb = OnlyText.main_kb
+        building_type = sector.building.building_type
+        if building_type=="spawn" or building_type=="void":
+            await state.clear()
+        if building_type=="shop" or building_type=="tavern" or building_type=="casino" or building_type=="bank":
+            await msg.answer("coming soon")
+            await state.clear()
+        if building_type=="work":
+            await state.set_state(Interact.work)
+            kb = [[types.KeyboardButton(text="Работать")], [types.KeyboardButton(text="Сьебаться в страхе")]]
+
+        await msg.answer(f"Ты зашел в {sector.building.name}\nВладелец: {sector.building.owner.name}\n", reply_markup=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True))
+    if text=="построить чёта)":
+        await state.set_state(Interact.build)
+        kb = []
+        for i in Hip.buildings:
+            kb.append([types.KeyboardButton(text=i)])
+        keyboard=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
+        await msg.answer( f"кароч, ты можешь тут построить следующие постройки:\n{Hip.get_all()}", reply_markup=keyboard)
+    if text=="захватить":
+        await state.clear()
+        await msg.answer("coming soon", reply_markup=OnlyText.keyboard)
+@router.message(aiogram.filters.StateFilter(Interact.enter))
+async def interact_enter(msg: types.Message, state=FSMContext):
+    text = msg.text.lower()
+    player = players[msg.from_user.id]
+    sector = Map.get_sector(player.x, player.y)
+    if sector.building.building_type=="work":
+        if text=="работать":
+            await state.set_state(Buildings.working)
+
+
 
 @router.message(StateFilter(aiogram.fsm.state.default_state))
 async def unknown(msg: types.Message, state=FSMContext):
@@ -101,9 +150,9 @@ async def unknown(msg: types.Message, state=FSMContext):
         await state.set_state(Interact.interact)
         kb = []
         sector = Map.get_sector(player.x, player.y)
-        if sector.building.building_type=="void": kb.append(types.KeyboardButton(text="Построить чёта)"))
-        else: kb.append(types.KeyboardButton(text="Зайти в постройку)"))
-        if sector.fraction!=player.fraction: kb.append(types.KeyboardButton(text="Захватить"))
+        if sector.building.building_type=="void": kb.append([types.KeyboardButton(text="Построить чёта)")])
+        else: kb.append([types.KeyboardButton(text="Зайти в постройку)")])
+        if sector.fraction!=player.fraction: kb.append([types.KeyboardButton(text="Захватить")])
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         await msg.answer("Выбирай чо делать будем)", reply_markup=keyboard)
         await state.set_state(Interact.choosing)

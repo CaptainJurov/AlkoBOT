@@ -81,6 +81,7 @@ class Map:
     class Sector:
 
         class Building:
+
             def __init__(self, name: str, owner: Player, building_type: str):
                 self.name = name
                 self.owner = owner
@@ -137,8 +138,9 @@ class Map:
                 if self.map[y][x].fraction == fraction: counter+=1
         return counter
 
-    def get_sector(self, x: int, y: int):
+    def get_sector(self, x: int, y: int) -> Sector:
         return self.map[y][x]
     def create_clan(self, fraction: Fraction):
         self.fraction_list.append(fraction)
         self.capture_sector(fraction, fraction.x, fraction.y)
+        self.get_sector(fraction.y, fraction.x).build(Map.Sector.Building(f"База клана {fraction.name}", owner=fraction.owner, building_type="spawn"))
