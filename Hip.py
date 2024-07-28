@@ -15,7 +15,9 @@ buildings = {
     "Банк": Building("Банк", "bank", 1_000_000_000),
     "Шахта": Building("Шахта", "mine", 100_000_000),
     "Казино": Building("Казино", "casino", 1_000_000_000),
-    "Дорога": Building("Дорога", "road", 10_000_000)
+    "Дорога": Building("Дорога", "road", 10_000_000),
+    "Призывной пункт": Building("Призывной пункт", "warriors", 100_000_000),
+    "Бесполезная постройка": Building("Фонтан", "useless", 1_000_000)
 }
 buildings_for_types = {}
 for i in buildings:

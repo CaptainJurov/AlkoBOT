@@ -44,8 +44,9 @@ class Fraction:
 
 
 class Item:
-    def __init__(self, name):
-        self.name = name
+    def __init__(self, name: str, cost: int):
+        self.name: str = name
+        self.cost: int = cost
 class Player:
     def __init__(self, user_id: int, fraction: Fraction, nickname: str = None):
         self.user_id: int = user_id
@@ -54,6 +55,8 @@ class Player:
         self.fraction: Fraction = fraction
         self.power = 2
         self.warriors = []
+        self.backpack = []
+        self.leader = 5
         self.balance: int = 100
         self.playable: bool = True
     def move(self, delta_x: int, delta_y: int):
@@ -68,6 +71,28 @@ class Player:
         for i in self.warriors:
             count+=i.power
         return count
+    def get_warriors(self) -> str:
+        text = ""
+        if len(self.warriors)==0:
+            return "Никто)"
+        i=0
+        while i in range(len(self.warriors)):
+            count=0
+            sr: Warrior = self.warriors[i]
+            for j in range(i, len(self.warriors), 1):
+                sr_j: Warrior = self.warriors[j]
+                if sr.name==sr_j.name and sr.power==sr_j.power:
+                    count+=1
+                    i+=1
+            text+=f"{sr.name} - сила {sr.power} - количество {count}\n"
+        return text
+    def choose_warrior(self, warrior_name: str) -> Warrior:
+        if len(self.warriors)==0:
+            return KeyError
+        for i in range(len(self.warriors)):
+            if warrior_name==self.warriors[i].name:
+                return self.warriors.pop(i)
+
 
 class Map:
 
@@ -127,6 +152,7 @@ class Map:
             self.annihilate_clan(self.map[y][x].fraction)
         self.map[y][x].fraction = winner
         self.map[y][x].warriors = []
+        self.map[y][x].destroy()
     def annihilate_clan(self, fraction: Fraction):
         for y in range(self.size_y):
             for x in range(self.size_x):
