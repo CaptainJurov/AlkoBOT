@@ -10,6 +10,8 @@ class Warrior:
             return "[b] "+self.name
         else:
             return "[P] "+self.name
+    def get_power(self) -> int:
+        return self.power
 class Fraction:
     def __init__(self, name: str, x: int, y: int, player=None):
         self.name = name
@@ -27,14 +29,7 @@ class Fraction:
         return False
     def change_name(self, name: str):
         self.name = name
-    def naem(self, player):
-        warrior = Warrior(player.name, player.power, 10000*player.power, entity=player)
-        self.warriors_types.append(warrior)
-        self.warriors[warrior] = 1
-        player.warrior = warrior
-        player.change_playable(False)
-        player.balance += 10000*player.power
-        return warrior
+
     def get_warrior(self, warrior: Warrior):
         for i in self.warriors:
             if i.get_name() == warrior.get_name():
@@ -46,13 +41,6 @@ class Fraction:
             del self.warriors[warrior]
             return True
         return False
-    def end_naem(self, player):
-        warrior = player.warrior
-        if self.get_warrior(warrior):
-
-            self.remove_warrior(warrior)
-            player.warrior = None
-            player.change_playable(True)
 
 
 class Item:
@@ -65,7 +53,7 @@ class Player:
         self.x, self.y = fraction.getbase()
         self.fraction: Fraction = fraction
         self.power = 2
-        self.warrior: Warrior = None
+        self.warriors = []
         self.balance: int = 100
         self.playable: bool = True
     def move(self, delta_x: int, delta_y: int):
@@ -73,8 +61,13 @@ class Player:
         self.y += delta_y
     def change_playable(self, value: bool):
         self.playable = value
-
-
+    def new_warrior(self, warrior: Warrior):
+        self.warriors.append(warrior)
+    def total_power(self) -> int:
+        count = 0
+        for i in self.warriors:
+            count+=i.power
+        return count
 
 class Map:
 
@@ -107,6 +100,13 @@ class Map:
             self.building = build
         def destroy(self):
             self.building = self.Building("Ничего", None, "void")
+        def get_defense(self) -> int:
+            value: int = 0
+            for i in self.warriors:
+                value+=i.power
+            return value
+        def new_warrior(self, warrior: Warrior):
+            self.warriors.append(warrior)
 
     def __init__(self, size_x: int, size_y: int):
         #создание и заполнение карты
@@ -126,6 +126,7 @@ class Map:
         if self.map[y][x].fraction.getbase()==(x, y):
             self.annihilate_clan(self.map[y][x].fraction)
         self.map[y][x].fraction = winner
+        self.map[y][x].warriors = []
     def annihilate_clan(self, fraction: Fraction):
         for y in range(self.size_y):
             for x in range(self.size_x):

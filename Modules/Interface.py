@@ -124,7 +124,24 @@ async def inter_choose(msg: types.Message, state=FSMContext):
         await msg.answer( f"кароч, ты можешь тут построить следующие постройки:\n{Hip.get_all()}", reply_markup=keyboard)
     if text=="захватить":
         await state.clear()
-        await msg.answer("coming soon", reply_markup=OnlyText.keyboard)
+        if player.power>sector.get_defense():
+            defense = sector.get_defense()
+            reward = defense*10000
+            losses = player.power*(defense/player.power)
+            player.balance+=reward
+            Map.capture_sector(player.fraction, player.x, player.y)
+            await msg.answer(f"Нихуйно, сектор захвачен\nТвоя награда: {reward:,} шекелей\nГлава клана будет уведомлён о твоих достижениях")
+            try:
+                await bot.send_message(chat_id=player.fraction.owner.id, text=f"Игрок {player.name} захватил сектор [{sector.x};{sector.y}]\nЗащита сектора при атаке: {defense}\nПоказатель атаки игрока: {player.power}")
+            except:
+                print("sector has been captured")
+
+        else:
+            await msg.answer("Ебать ты слабость, не вывез\n\nПоказатель полезности для клана сброшен\nТы сдох", reply_markup=OnlyText.keyboard)
+            player.x, player.y = player.fraction.getbase()
+            player.power = 1
+            _, losses = Mechanic.calculate_losses(player.power, sector.get_defense(), sector.basic_def)
+
     if text=="меню постройки":
         await state.set_state(Buildings.settings)
         kb=[[types.KeyboardButton(text="Переименовать")], [types.KeyboardButton(text="Продать к хуям")]]
