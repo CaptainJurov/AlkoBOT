@@ -21,6 +21,7 @@ class Interact(aiogram.filters.state.StatesGroup):
     build = aiogram.filters.state.State()
     work = aiogram.filters.state.State()
     capture = aiogram.filters.state.State()
+    warriors = aiogram.filters.state.State()
 class Buildings(aiogram.filters.state.StatesGroup):
     working = aiogram.filters.state.State()
     choosing = aiogram.filters.state.State()
@@ -97,6 +98,32 @@ async def moving_choose(msg: types.Message, state=FSMContext):
     if not(sector.building.building_type=="void"): enter+=f"\nВладелец постройки: {sector.building.owner.name}"
     await msg.answer(enter, reply_markup=OnlyText.keyboard)
     await state.clear()
+@router.message(aiogram.filters.StateFilter(Interact.warriors))
+async def inter_choose_warriors(msg: types.Message, state=FSMContext):
+    player = players[msg.from_user.id]
+    sector = Map.get_sector(player.x, player.y)
+    text = msg.text
+    if text=="Отмена":
+        await state.clear()
+        await main_page()
+        return False
+    warrior = player.warriors
+    founded = False
+    i: Classes.Warrior
+    for i in range(len(warrior)):
+        if text == player.warriors[i].name:
+            player.balance += player.warriors[i].price
+            sector.new_warrior(player.warriors.pop(i))
+            founded=True
+            break
+    if not founded:
+        await msg.answer("Солдат не найден(Отряд не заметил потери бойца)", reply_markup=OnlyText.keyboard)
+        await state.clear()
+    else:
+        await msg.answer("Родина-клан гордится вами\nБаланс пополнен", reply_markup=OnlyText.keyboard)
+        await state.clear()
+
+
 @router.message(aiogram.filters.StateFilter(Interact.choosing))
 async def inter_choose(msg: types.Message, state=FSMContext):
     text = msg.text.lower()
@@ -106,6 +133,19 @@ async def inter_choose(msg: types.Message, state=FSMContext):
         await state.clear()
         await main_page(msg)
 
+    if text=="оставить войска":
+        await state.set_state(Interact.warriors)
+        kb = []
+        i: Classes.Warrior
+        text_to_send = ""
+        if len(player.warriors)==0:
+            text_to_send+=f"Никто))\n"
+        else:
+            for i in player.warriors:
+                kb.append([types.KeyboardButton(text=f"{i.name}")])
+                text_to_send += f"\n{i.get_name()} - сила: {i.power}; цена - {i.price}"
+        kb.append([types.KeyboardButton(text="Отмена")])
+        await msg.answer(f"Выбирай кого оставишь тут\n{text_to_send}", reply_markup=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True))
     if text=="зайти в постройку)":
         await state.set_state(Interact.enter)
         kb = OnlyText.main_kb
@@ -135,6 +175,7 @@ async def inter_choose(msg: types.Message, state=FSMContext):
             for i in player.fraction.warriors_types:
                 kb.append([types.KeyboardButton(text=f"{i.name}")])
                 text_to_send+=f"\n{i.get_name()} - сила: {i.power}; цена - {i.price}"
+
         if kb!=OnlyText.keyboard: kb.append([types.KeyboardButton(text="Отмена")])
         await msg.answer(text_to_send, reply_markup=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True))
     if text=="построить чёта)":
@@ -249,18 +290,20 @@ async def interact_enter(msg: types.Message, state=FSMContext):
                     await msg.answer("Нищеебина сьеби с сектора", reply_markup=OnlyText.keyboard)
         await state.clear()
     if sector.building.building_type=="shop":
-        towars = []
+
         i: Classes.Item
         for i in sector.building.items:
-            towars.append(i.name)
-        if text in towars:
-            towar: Classes.Item = towars[towars.index(text)]
-            if player.balance>=towar.cost:
-                player.backpack.append(towar)
-                player.balance-=towar.cost
-                await msg.answer(f"Товар куплен, текущий баланс: \n{player.balance} шекелей", reply_markup=OnlyText.keyboard)
-            else:
-                await msg.answer("хуила нищая сьеби с магазина нахуй", reply_markup=OnlyText.keyboard)
+            if text==i.name:
+
+                towar = i
+
+                if player.balance>=towar.cost:
+                    player.backpack.append(towar)
+                    player.balance-=towar.cost
+                    sector.building.owner.balance+=(towar.cost*0.1)
+                    await msg.answer(f"Товар куплен, текущий баланс: \n{player.balance} шекелей", reply_markup=OnlyText.keyboard)
+                else:
+                    await msg.answer("хуила нищая сьеби с магазина нахуй", reply_markup=OnlyText.keyboard)
         await state.clear()
 
 
@@ -307,13 +350,21 @@ async def unknown(msg: types.Message, state=FSMContext):
     if text.lower()=="статус":
         sector = Map.get_sector(player.x, player.y)
         enter = f"Ебать здарова\n\nТы находишся в секторе - [{player.x}; {player.y}]\nСектор принадлежит клану {sector.fraction.name}\nПостройка в секторе: {sector.building.name}"
+        if player.fraction==sector.fraction: enter+=f"\nВойск в секторе: {len(sector.warriors)}\nОбщий показатель защиты: {sector.get_defense()}"
         if not (sector.building.building_type == "void"): enter += f"\nВладелец постройки: {sector.building.owner.name}"
-        enter += f"\n\nОсмотр твоего еблища дал понять что\n{player.name} - твоё имя\n{player.fraction.name} - Твоя группировка\n{player.power} - коэффициент пользы для клана\n{player.balance} шекелей в кармане\n"
+        enter += f"\n\nОсмотр твоего еблища дал понять что\n{player.name} - твоё имя\n{player.fraction.name} - Твоя группировка\n{player.power} - коэффициент пользы для клана\n{int(player.balance)} шекелей в кармане\n"
         enter += f"\nТвой отряд: \n"
         if len(player.warriors)==0:
             enter+= f"Никто)\n"
         else:
             enter+=player.get_warriors()
+        enter+=f"\nОбщий показатель силы: {player.total_power()+player.power}"
+        enter+=f"\n\nПредметы в рюкзаке:\n"
+        if len(player.backpack)==0:
+            enter+=f"Ничего)\n"
+        else:
+            for i in player.backpack:
+                enter+=f"{i.name}\n"
         await msg.answer(enter, reply_markup=OnlyText.keyboard)
         return True
     if text.lower()=="взаимодействие":
@@ -321,6 +372,7 @@ async def unknown(msg: types.Message, state=FSMContext):
         kb = []
         sector = Map.get_sector(player.x, player.y)
         if sector.building.building_type=="void" and sector.fraction==player.fraction: kb.append([types.KeyboardButton(text="Построить чёта)")])
+        if sector.fraction==player.fraction: kb.append([types.KeyboardButton(text="Оставить войска")])
         if sector.building.building_type!="void": kb.append([types.KeyboardButton(text="Зайти в постройку)")])
         if sector.fraction!=player.fraction: kb.append([types.KeyboardButton(text="Захватить")])
         if sector.building.owner==player: kb.append([types.KeyboardButton(text="Меню постройки")])

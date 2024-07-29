@@ -19,6 +19,7 @@ buildings = {
     "Призывной пункт": Building("Призывной пункт", "warriors", 100_000_000),
     "Бесполезная постройка": Building("Фонтан", "useless", 1_000_000)
 }
+
 buildings_for_types = {}
 for i in buildings:
     buildings_for_types[buildings[i].type] = buildings[i]

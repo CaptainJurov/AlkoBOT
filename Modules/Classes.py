@@ -1,10 +1,10 @@
 
 class Warrior:
     def __init__(self, name:str, power: int, price: int, entity=None):
-        self.name = name
-        self.power = power
+        self.name: str = name
+        self.power: int = power
         self.entity = entity
-        self.price = price
+        self.price: int = price
     def get_name(self):
         if self.entity is None:
             return "[b] "+self.name
@@ -44,9 +44,10 @@ class Fraction:
 
 
 class Item:
-    def __init__(self, name: str, cost: int):
+    def __init__(self, name: str, cost: int, count: int = 0):
         self.name: str = name
         self.cost: int = cost
+        self.count = count
 class Player:
     def __init__(self, user_id: int, fraction: Fraction, nickname: str = None):
         self.user_id: int = user_id
@@ -105,7 +106,7 @@ class Map:
                 self.firstname: str = name
                 self.owner = owner
                 self.building_type = building_type
-                self.items = []
+                self.items = [Item("Снюс", 300)]
                 self.materia_count = 10
             def add_item(self, item: Item):
                 self.items.append(item)
