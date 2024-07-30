@@ -5,6 +5,8 @@ import random
 import Hip
 from Hip import bot, Map, players
 from Text import OnlyText
+from Modules.Building_Handler import Buildings
+from Modules.Interface import main_page
 from Modules import Classes, Mechanic
 from aiogram.filters import StateFilter
 
