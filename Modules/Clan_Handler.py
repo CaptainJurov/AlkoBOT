@@ -18,24 +18,35 @@ class CustomFilter(Filter):
 @router.message(CustomFilter())
 async def filter(msg: types.Message, state=FSMContext):
     await state.set_state(ChooseClan.kicked)
-    await msg.answer("тебя кикнули с клана, выбирай новый", reply_markup=types.ReplyKeyboardMarkup(keyboard=[[types.KeyboardButton(text="Пойти нахуй")]], resize_keyboard=True))
     Hip.kicked.remove(msg.from_user.id)
+    text = f"Тебя кикнули с клана\n\nСписок доступных фракций:\n"
+    kb = []
+    for i in range(1, len(Map.fraction_list)):
+        text += f"[{i}] - {Map.fraction_list[i].name}\n"
+        kb.append([types.KeyboardButton(text=str(i))])
+    keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True, one_time_keyboard=True)
+    await msg.answer(text, reply_markup=keyboard)
 @router.message(aiogram.filters.StateFilter(ChooseClan.kicked))
 async def kicked(msg: types.Message, state=FSMContext):
     player = players[msg.from_user.id]
     text_t = msg.text
     try:
         choose = int(msg.text)
-        if choose in range(1, len(Map.fraction_list)) and choose!=0 and Map.fraction_list[choose].open:
+        if choose in range(1, len(Map.fraction_list)) and choose != 0 and Map.fraction_list[choose].open and \
+                Map.fraction_list[choose].check_user(user_id=msg.from_user.id):
+            user_id = msg.from_user.id
             frac = Map.fraction_list[choose]
             player.fraction = frac
-            player.x, player.y = frac.getbase()
-            frac.players.append(player)
-            await msg.answer(f"Ахуительно, теперь ты с братвой клана [{frac.name}]\nКоординаты спавна фракции - [x={frac.x}; y={frac.y}]")
-            await state.clear()
+            frac.players.append(players[user_id])
+            await msg.answer(
+                f"Ахуительно, теперь ты с братвой клана [{frac.name}]\nКоординаты спавна фракции - [x={frac.x}; y={frac.y}]")
             return True
-        if not(Map.fraction_list[choose].open):
+        if not (Map.fraction_list[choose].open):
             await msg.answer("Данная фракция закрыла набор новичков")
+            return None
+        if not (Map.fraction_list[choose].check_user(user_id=msg.from_user.id)):
+            await msg.answer("Тебя ебаклака забанили в этом клане, выбирай другой")
+            return None
         await msg.answer(f"Умный дохуя?")
     except:
 
@@ -65,7 +76,7 @@ async def unknown(msg: types.Message, state=FSMContext):
 async def choosing(msg: types.Message, state=FSMContext):
     try:
         choose = int(msg.text)
-        if choose in range(1, len(Map.fraction_list)) and choose!=0 and Map.fraction_list[choose].open:
+        if choose in range(1, len(Map.fraction_list)) and choose!=0 and Map.fraction_list[choose].open and Map.fraction_list[choose].check_user(user_id=msg.from_user.id):
             user_id = msg.from_user.id
             frac = Map.fraction_list[choose]
             players[user_id] = Classes.Player(user_id, frac, nickname=str(user_id))
@@ -77,6 +88,8 @@ async def choosing(msg: types.Message, state=FSMContext):
             return True
         if not(Map.fraction_list[choose].open):
             await msg.answer("Данная фракция закрыла набор новичков")
+        if not(Map.fraction_list[choose].check_user(user_id=msg.from_user.id)):
+            await msg.answer("Тебя ебаклака забанили в этом клане, выбирай другой")
         await msg.answer(f"Умный дохуя?")
     except:
         await msg.answer("Долбаеб блять жми кнопки и выбирай по человечески")
@@ -193,7 +206,33 @@ async def page_settings(msg: types.Message, state=FSMContext):
 @router.message(aiogram.filters.StateFilter(ChooseClan.ban))
 async def banning(msg: types.Message, state=FSMContext):
     text = msg.text
-
+    player = players[msg.from_user.id]
+    i: Classes.Player
+    for i in player.fraction.players:
+        if i.user_id == text or i.name == text:
+            player.fraction.kick_man(i)
+            Hip.kicked.append(i.user_id)
+            await bot.send_message(chat_id=i.user_id, text="Тебя забанили к хуям в клане, выбирай новый")
+            await msg.answer("Долбаёб успешно получил по еблу", reply_markup=OnlyText.keyboard)
+            player.fraction.banned_players[str(i.user_id)] = i
+            await state.clear()
+            return True
+    await msg.answer("Чел не найден...\nвведи заново", reply_markup=OnlyText.keyboard)
+    await state.clear()
+@router.message(aiogram.filters.StateFilter(ChooseClan.unban))
+async def unbanning(msg: types.Message, state=FSMContext):
+    player = players[msg.from_user.id]
+    text = msg.text
+    unbanned = text
+    for i in player.fraction.banned_players:
+                    if player.fraction.banned_players[i].name==text:
+                        unbanned = i
+                        await msg.answer("Чел разбанен", reply_markup=OnlyText.keyboard)
+                        await state.clear()
+                        player.fraction.unban(unbanned)
+                        return None
+    await msg.answer("Чел не найден в списках забаненных", reply_markup=OnlyText.keyboard)
+    await state.clear()
 @router.message(aiogram.filters.StateFilter(ChooseClan.warriors_id))
 async def warrior_id(msg: types.Message, state=FSMContext):
     player = players[msg.from_user.id]
@@ -232,8 +271,8 @@ async def clan_kick(msg: types.Message, state=FSMContext):
                 player.fraction.kick_man(i)
                 Hip.kicked.append(i.user_id)
                 await bot.send_message(chat_id=i.user_id, text="Тебя кикнули к хуям с клана, выбирай новый")
-                await msg.answer("Долбаёб успешно получил по еблу, воины переданы главе", reply_markup=OnlyText.keyboard)
+                await msg.answer("Долбаёб успешно получил по еблу", reply_markup=OnlyText.keyboard)
                 await state.clear()
                 return True
-    await msg.answer("Чел не найден...\nвведи заново")
-
+    await msg.answer("Чел не найден...\nвведи заново", reply_markup=OnlyText.keyboard)
+    await state.clear()

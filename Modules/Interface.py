@@ -79,9 +79,12 @@ async def unknown(msg: types.Message, state=FSMContext):
         return True
     if text.lower()=="клан":
         await state.set_state(ChooseClan.clan_page)
-        kb = [[types.KeyboardButton(text="Создать свой клан[1млрд шек.]")], [types.KeyboardButton(text="Ничего")]]
+        kb = []
+        if player.fraction.owner!=player:
+            kb.append([types.KeyboardButton(text="Создать свой клан[1млрд шек.]")])
         if player==player.fraction.owner:
             kb.append([types.KeyboardButton(text="Управление")])
+        kb.append( [types.KeyboardButton(text="Ничего")])
         clan: Classes.Fraction = player.fraction
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         info = f"Ахуеть, этот клан называется {clan.name}\nПиздец в клане войск:\n"

@@ -22,11 +22,15 @@ class Fraction:
         self.warriors = {self.warriors_types[0]: 10, self.warriors_types[1]: 0}
         self.owner: Player = player
         self.players: [Player] = []
-        self.banned_players: [Player] = []
+        self.banned_players = {}
     def migrate(self, fraction, player):
         self.players.remove(player)
         player.fraction = fraction
-
+    def check_user(self, user_id: int) -> bool:
+        for i in self.banned_players:
+            if i==user_id:
+                return False
+        return True
     def getbase(self):
         return (self.x, self.y)
     def change_warrior_name(self, level: int, name: str):
@@ -54,6 +58,8 @@ class Fraction:
                 self.players.remove(i)
                 return True
         return False
+    def unban(self, user_id: int):
+        del self.banned_players[user_id]
 
 
 class Item:
@@ -106,6 +112,12 @@ class Player:
         for i in range(len(self.warriors)):
             if warrior_name==self.warriors[i].name:
                 return self.warriors.pop(i)
+    def transfer_money(self, side, amount: int):
+        if self.balance>=amount:
+            self.balance-=amount
+            side.balance+=amount
+        else:
+            return ValueError
 
 
 class Map:
@@ -163,7 +175,15 @@ class Map:
 
     def capture_sector(self, winner: Fraction, x: int, y: int, ):
         if self.map[y][x].fraction.getbase()==(x, y):
+            for player in self.map[y][x].fraction.players:
+                player.fraction = winner
+            try:
+                self.map[y][x].fraction.owner.transfer_money(winner.owner, self.map[y][x].fraction.owner.balance)
+                self.map[y][x].fraction.owner.fraction = winner
+
+            except: pass
             self.annihilate_clan(self.map[y][x].fraction)
+
         self.map[y][x].fraction = winner
         self.map[y][x].warriors = []
         self.map[y][x].destroy()
@@ -173,6 +193,7 @@ class Map:
                 if self.map[y][x].fraction == fraction:
                     self.map[y][x].fraction=self.fraction_list[0]
         self.fraction_list.remove(fraction)
+
     def count_sectors(self, fraction: Fraction) -> int:
         counter: int = 0
         for y in range(self.size_y):
