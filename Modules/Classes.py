@@ -14,12 +14,13 @@ class Warrior:
         return self.power
 class Fraction:
     def __init__(self, name: str, x: int, y: int, player=None):
-        self.name = name
-        self.x = x
-        self.y = y
-        self.warriors_types = [Warrior("Рядовой", 1, 10000), Warrior("Сержант", 3, 25000)]
+        self.name: str = name
+        self.x: int = x
+        self.y: int = y
+        self.open: bool = True
+        self.warriors_types: list[Warrior] = [Warrior("Рядовой", 1, 10000), Warrior("Сержант", 3, 25000)]
         self.warriors = {self.warriors_types[0]: 10, self.warriors_types[1]: 0}
-        self.owner = player
+        self.owner: Player = player
     def getbase(self):
         return (self.x, self.y)
     def change_warrior_name(self, level: int, name: str):
@@ -169,7 +170,8 @@ class Map:
 
     def get_sector(self, x: int, y: int) -> Sector:
         return self.map[y][x]
-    def create_clan(self, fraction: Fraction):
+    def create_clan(self, fraction: Fraction) -> Fraction:
         self.fraction_list.append(fraction)
         self.capture_sector(fraction, fraction.x, fraction.y)
         self.get_sector(fraction.y, fraction.x).build(Map.Sector.Building(f"База клана {fraction.name}", owner=fraction.owner, building_type="spawn"))
+        return fraction

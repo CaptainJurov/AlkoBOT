@@ -3,12 +3,17 @@ from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import StateFilter
 import Hip
-from Hip import bot, Map, players
+from Hip import bot, Map, players, Interact
 from Text import OnlyText
 from Modules import Classes, Mechanic
 from Modules.Moving_Handler import Moving
-from Modules.Interact_Handler import Interact
 router = Router()
+class ChooseClan(aiogram.filters.state.StatesGroup):
+    choosing = aiogram.filters.state.State()
+    nickname = aiogram.filters.state.State()
+    clan_page = aiogram.filters.state.State()
+    create_clan = aiogram.filters.state.State()
+    settings = aiogram.filters.state.State()
 @router.message(aiogram.filters.Command("admin"))
 async def admin(msg: types.Message, state=FSMContext):
     player = players[msg.from_user.id]
@@ -60,7 +65,12 @@ async def unknown(msg: types.Message, state=FSMContext):
         await state.set_state(Interact.choosing)
         return True
     if text.lower()=="клан":
+        await state.set_state(ChooseClan.clan_page)
+        kb = [[types.KeyboardButton(text="Создать свой клан[1млрд шек.]")], [types.KeyboardButton(text="Ничего")]]
+        if player==player.fraction.owner:
+            kb.append([types.KeyboardButton(text="Управление")])
         clan: Classes.Fraction = player.fraction
+        keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         info = f"Ахуеть, этот клан называется {clan.name}\nПиздец в клане войск:\n"
         for i in clan.warriors:
             if clan.warriors[i]>0:
@@ -77,7 +87,7 @@ async def unknown(msg: types.Message, state=FSMContext):
             info+="Нихуйно, так держать! "
         elif counter>=100:
             info+="АХУЕТЬ КУДА ГОНИШЬ ОСТАНОВИСЬ БЛЯТЬ "
-        await msg.answer(info, reply_markup=OnlyText.keyboard)
+        await msg.answer(info, reply_markup=keyboard)
     else:
         await msg.answer("Чёта на неизвестном, попробуй кнопочки потыкать", reply_markup=OnlyText.keyboard)
 async def main_page(msg: types.Message):

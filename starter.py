@@ -6,8 +6,9 @@ from Modules import Interface, Clan_Handler, Building_Handler, Interact_Handler,
 
 async def main():
     print("starting bot...")
-    dp.include_router(Interface.router)
     dp.include_router(Clan_Handler.router)
+    dp.include_router(Interface.router)
+
     dp.include_router(Building_Handler.router)
     dp.include_router(Interact_Handler.router)
     dp.include_router(Moving_Handler.router)

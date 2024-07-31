@@ -3,7 +3,7 @@ from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 import random
 import Hip
-from Hip import bot, Map, players
+from Hip import bot, Map, players, Interact
 from Text import OnlyText
 from Modules.Building_Handler import Buildings
 from Modules.Interface import main_page
@@ -11,14 +11,7 @@ from Modules import Classes, Mechanic
 from aiogram.filters import StateFilter
 
 router = Router()
-class Interact(aiogram.filters.state.StatesGroup):
-    interact = aiogram.filters.state.State()
-    choosing = aiogram.filters.state.State()
-    enter = aiogram.filters.state.State()
-    build = aiogram.filters.state.State()
-    work = aiogram.filters.state.State()
-    capture = aiogram.filters.state.State()
-    warriors = aiogram.filters.state.State()
+
 @router.message(aiogram.filters.StateFilter(Interact.warriors))
 async def inter_choose_warriors(msg: types.Message, state=FSMContext):
     player = players[msg.from_user.id]
@@ -118,6 +111,10 @@ async def inter_choose(msg: types.Message, state=FSMContext):
         kb=[[types.KeyboardButton(text="Переименовать")], [types.KeyboardButton(text="Продать к хуям")]]
         keyboard=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         await msg.answer(f"Здарова начальник\nИмя постройки - {sector.building.name}\nТип постройки - {sector.building.firstname}", reply_markup=keyboard)
+
+
+
+
 @router.message(aiogram.filters.StateFilter(Interact.capture))
 async def capturing(msg: types.Message, state=FSMContext):
     player = players[msg.from_user.id]
@@ -166,6 +163,7 @@ async def interact_enter(msg: types.Message, state=FSMContext):
                 else:
                     await msg.answer("Нищеебина сьеби с сектора", reply_markup=OnlyText.keyboard)
         await state.clear()
+
     if sector.building.building_type=="shop":
 
         i: Classes.Item
@@ -182,6 +180,8 @@ async def interact_enter(msg: types.Message, state=FSMContext):
                 else:
                     await msg.answer("хуила нищая сьеби с магазина нахуй", reply_markup=OnlyText.keyboard)
         await state.clear()
+    if sector.building.building_type=="casino":
+        await state.set_state()
 
 
 @router.message(aiogram.filters.StateFilter(Interact.build))

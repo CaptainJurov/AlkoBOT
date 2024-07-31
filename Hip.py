@@ -1,5 +1,6 @@
 from config import keys
 from aiogram import Bot, Dispatcher
+import aiogram
 from aiogram.fsm.storage.memory import MemoryStorage
 from Modules import Classes
 print("loaded")
@@ -31,7 +32,14 @@ def get_all():
 players = {0: Classes.Player(0, Map.fraction_list[0], "Server")}
 Map.create_clan(Classes.Fraction("Хряки", 0, 0, player=players[0]))
 Map.create_clan(Classes.Fraction("Медведи", 1, 1, player=players[0]))
-
+class Interact(aiogram.filters.state.StatesGroup):
+    interact = aiogram.filters.state.State()
+    choosing = aiogram.filters.state.State()
+    enter = aiogram.filters.state.State()
+    build = aiogram.filters.state.State()
+    work = aiogram.filters.state.State()
+    capture = aiogram.filters.state.State()
+    warriors = aiogram.filters.state.State()
 bot = Bot(token=keys)
 storage = MemoryStorage()
 dp = Dispatcher(storage=storage)
