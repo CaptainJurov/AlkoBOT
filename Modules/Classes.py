@@ -21,6 +21,12 @@ class Fraction:
         self.warriors_types: list[Warrior] = [Warrior("Рядовой", 1, 10000), Warrior("Сержант", 3, 25000)]
         self.warriors = {self.warriors_types[0]: 10, self.warriors_types[1]: 0}
         self.owner: Player = player
+        self.players: [Player] = []
+        self.banned_players: [Player] = []
+    def migrate(self, fraction, player):
+        self.players.remove(player)
+        player.fraction = fraction
+
     def getbase(self):
         return (self.x, self.y)
     def change_warrior_name(self, level: int, name: str):
@@ -41,6 +47,12 @@ class Fraction:
             self.warriors_types.remove(warrior)
             del self.warriors[warrior]
             return True
+        return False
+    def kick_man(self, player) -> bool:
+        for i in self.players:
+            if player==i:
+                self.players.remove(i)
+                return True
         return False
 
 

@@ -106,7 +106,7 @@ async def inter_choose(msg: types.Message, state=FSMContext):
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         await msg.answer(f"Смелое решение\nВ этом секторе сидят {len(sector.warriors)} вояк\nВсё еще хочешь этот сектор?", reply_markup=keyboard)
 
-    if text=="меню постройки":
+    if text=="меню постройки" and player==player.fraction.owner:
         await state.set_state(Buildings.settings)
         kb=[[types.KeyboardButton(text="Переименовать")], [types.KeyboardButton(text="Продать к хуям")]]
         keyboard=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)

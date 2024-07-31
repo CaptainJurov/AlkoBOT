@@ -3,17 +3,30 @@ from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
 from aiogram.filters import StateFilter
 import Hip
+import config
 from Hip import bot, Map, players, Interact
 from Text import OnlyText
 from Modules import Classes, Mechanic
 from Modules.Moving_Handler import Moving
+
 router = Router()
+async def change_user_state(user_id: int, new_state):
+    # Получаем контекст состояния для пользователя
+    async with FSMContext(Hip.storage, config.keys) as state:
+        user = await state.get_user(user_id)
+        await state.set_state(state=new_state)
 class ChooseClan(aiogram.filters.state.StatesGroup):
     choosing = aiogram.filters.state.State()
     nickname = aiogram.filters.state.State()
     clan_page = aiogram.filters.state.State()
     create_clan = aiogram.filters.state.State()
     settings = aiogram.filters.state.State()
+    warriors_id = aiogram.filters.state.State()
+    warrior_name = aiogram.filters.state.State()
+    kick = aiogram.filters.state.State()
+    kicked = aiogram.filters.state.State()
+    ban = aiogram.filters.state.State()
+    unban = aiogram.filters.state.State()
 @router.message(aiogram.filters.Command("admin"))
 async def admin(msg: types.Message, state=FSMContext):
     player = players[msg.from_user.id]
@@ -87,6 +100,7 @@ async def unknown(msg: types.Message, state=FSMContext):
             info+="Нихуйно, так держать! "
         elif counter>=100:
             info+="АХУЕТЬ КУДА ГОНИШЬ ОСТАНОВИСЬ БЛЯТЬ "
+        info+=f"\n\nнабор новичков {"открыт" if player.fraction.open else "закрыт"}"
         await msg.answer(info, reply_markup=keyboard)
     else:
         await msg.answer("Чёта на неизвестном, попробуй кнопочки потыкать", reply_markup=OnlyText.keyboard)
