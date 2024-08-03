@@ -6,6 +6,7 @@ import Hip
 from Hip import bot, Map, players, Interact
 from Text import OnlyText
 from Modules.Building_Handler import Buildings
+from Modules.Casino import Casino
 from Modules.Interface import main_page
 from Modules import Classes, Mechanic
 from aiogram.filters import StateFilter
@@ -112,9 +113,6 @@ async def inter_choose(msg: types.Message, state=FSMContext):
         keyboard=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         await msg.answer(f"Здарова начальник\nИмя постройки - {sector.building.name}\nТип постройки - {sector.building.firstname}", reply_markup=keyboard)
 
-
-
-
 @router.message(aiogram.filters.StateFilter(Interact.capture))
 async def capturing(msg: types.Message, state=FSMContext):
     player = players[msg.from_user.id]
@@ -181,7 +179,18 @@ async def interact_enter(msg: types.Message, state=FSMContext):
                     await msg.answer("хуила нищая сьеби с магазина нахуй", reply_markup=OnlyText.keyboard)
         await state.clear()
     if sector.building.building_type=="casino":
-        await state.set_state()
+        await state.set_state(Casino.choose)
+        kb = [
+            [types.KeyboardButton(text="Рулетка(Глобальная)")],
+
+            [types.KeyboardButton(text="Рулетка(В секторе)")],
+            [types.KeyboardButton(text="Камень/Ножницы/Бумага")],
+
+            [types.KeyboardButton(text="Очко")],
+            [types.KeyboardButton(text="Отмена")]
+
+        ]
+        await msg.answer(f"Ебать нахуй, homo ludens решил посетить естественную среду обитания\nВыбирай в каком режиме сосать будешь\n\n{OnlyText.casic_rejim} ", reply_markup=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True))
 
 
 @router.message(aiogram.filters.StateFilter(Interact.build))
@@ -196,7 +205,7 @@ async def interact_building(msg: types.Message, state=FSMContext):
         await state.clear()
         await main_page(msg)
     if not(text in sp):
-        await msg.answer("АШИБКА КОД 002\nЖми на кнопки еблан", reply_markup=OnlyText.keyboard)
+        await msg.answer("АШИБКА КОД IH199\nЖми на кнопки еблан", reply_markup=OnlyText.keyboard)
         await state.clear()
         return False
     building: Hip.Building = Hip.buildings[text]
@@ -207,7 +216,7 @@ async def interact_building(msg: types.Message, state=FSMContext):
 
             await msg.answer(f"Заебок\nЗдание {building.name} успешно построено\nпереименовать постройку можно в меню взаимодействия", reply_markup=OnlyText.keyboard)
         else:
-            await msg.answer("АШИБКА КОД 003\nНа секторе уже чёта есть", reply_markup=OnlyText.keyboard)
+            await msg.answer("АШИБКА КОД IH210\nНа секторе уже чёта есть", reply_markup=OnlyText.keyboard)
 
     else:
         await msg.answer("Хуйня нищая, накопи столько сначала", reply_markup=OnlyText.keyboard)

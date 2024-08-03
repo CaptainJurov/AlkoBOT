@@ -2,14 +2,17 @@ from config import keys
 from aiogram import Bot, Dispatcher
 import aiogram
 from aiogram.fsm.storage.memory import MemoryStorage
-from Modules import Classes
+from Modules import Classes, Timer
 print("loaded")
+Clock = Timer.Timer()
+glob_room = Classes.Room()
 Map = Classes.Map(100, 100)
+
 class Building:
     def __init__(self, name: str, type: str, price: int):
-        self.name = name
-        self.type = type
-        self.price = price
+        self.name: str = name
+        self.type: str = type
+        self.price: int = price
 buildings = {
     "Завод" :Building("Завод", "work", 100_000_000),
     "Магазин": Building("Магазин", "shop", 10_000_000),
@@ -40,6 +43,8 @@ class Interact(aiogram.filters.state.StatesGroup):
     work = aiogram.filters.state.State()
     capture = aiogram.filters.state.State()
     warriors = aiogram.filters.state.State()
+
+rooms: [Classes.Room] = []
 storaga = {}
 kicked = []
 banned = []

@@ -1,17 +1,23 @@
+import random
+from Modules import Timer
 
 class Warrior:
-    def __init__(self, name:str, power: int, price: int, entity=None):
+    def __init__(self, name: str, power: int, price: int, entity=None):
         self.name: str = name
         self.power: int = power
         self.entity = entity
         self.price: int = price
+
     def get_name(self):
         if self.entity is None:
-            return "[b] "+self.name
+            return "[b] " + self.name
         else:
-            return "[P] "+self.name
+            return "[P] " + self.name
+
     def get_power(self) -> int:
         return self.power
+
+
 class Fraction:
     def __init__(self, name: str, x: int, y: int, player=None):
         self.name: str = name
@@ -23,21 +29,26 @@ class Fraction:
         self.owner: Player = player
         self.players: [Player] = []
         self.banned_players = {}
+
     def migrate(self, fraction, player):
         self.players.remove(player)
         player.fraction = fraction
+
     def check_user(self, user_id: int) -> bool:
         for i in self.banned_players:
-            if i==user_id:
+            if i == user_id:
                 return False
         return True
+
     def getbase(self):
         return (self.x, self.y)
+
     def change_warrior_name(self, level: int, name: str):
         if self.warriors_types[level].entity is None:
             self.warriors_types[level].name = name
             return True
         return False
+
     def change_name(self, name: str):
         self.name = name
 
@@ -46,18 +57,21 @@ class Fraction:
             if i.get_name() == warrior.get_name():
                 return i
         return False
+
     def remove_warrior(self, warrior: Warrior):
         if self.get_warrior(warrior):
             self.warriors_types.remove(warrior)
             del self.warriors[warrior]
             return True
         return False
+
     def kick_man(self, player) -> bool:
         for i in self.players:
-            if player==i:
+            if player == i:
                 self.players.remove(i)
                 return True
         return False
+
     def unban(self, user_id: int):
         del self.banned_players[user_id]
 
@@ -67,78 +81,116 @@ class Item:
         self.name: str = name
         self.cost: int = cost
         self.count = count
+
+
 class Player:
     def __init__(self, user_id: int, fraction: Fraction, nickname: str = None):
         self.user_id: int = user_id
         self.name: str = nickname
         self.x, self.y = fraction.getbase()
         self.fraction: Fraction = fraction
-        self.power = 2
-        self.warriors = []
-        self.backpack = []
-        self.leader = 5
+        self.power: int = 2
+        self.warriors: [Warrior] = []
+        self.backpack: [Item] = []
+        self.leader: int = 5
         self.balance: int = 100
         self.playable: bool = True
+
     def move(self, delta_x: int, delta_y: int):
         self.x += delta_x
         self.y += delta_y
+
     def change_playable(self, value: bool):
         self.playable = value
+
     def new_warrior(self, warrior: Warrior):
         self.warriors.append(warrior)
+
     def total_power(self) -> int:
         count = 0
         for i in self.warriors:
-            count+=i.power
+            count += i.power
         return count
+
     def get_warriors(self) -> str:
         text = ""
-        if len(self.warriors)==0:
+        if len(self.warriors) == 0:
             return "Никто)"
-        i=0
+        i = 0
         while i in range(len(self.warriors)):
-            count=0
+            count = 0
             sr: Warrior = self.warriors[i]
             for j in range(i, len(self.warriors), 1):
                 sr_j: Warrior = self.warriors[j]
-                if sr.name==sr_j.name and sr.power==sr_j.power:
-                    count+=1
-                    i+=1
-            text+=f"{sr.name} - сила {sr.power} - количество {count}\n"
+                if sr.name == sr_j.name and sr.power == sr_j.power:
+                    count += 1
+                    i += 1
+            text += f"{sr.name} - сила {sr.power} - количество {count}\n"
         return text
+
     def choose_warrior(self, warrior_name: str) -> Warrior:
-        if len(self.warriors)==0:
-            return KeyError
+        if len(self.warriors) == 0:
+            raise KeyError
         for i in range(len(self.warriors)):
-            if warrior_name==self.warriors[i].name:
+            if warrior_name == self.warriors[i].name:
                 return self.warriors.pop(i)
+
     def transfer_money(self, side, amount: int):
-        if self.balance>=amount:
-            self.balance-=amount
-            side.balance+=amount
+        if self.balance >= amount:
+            self.balance -= amount
+            side.balance += amount
         else:
             return ValueError
 
 
-class Map:
+class Room:
 
+        def __init__(self):
+            self.room: {int: int} = {}
+            
+        def append_user(self, user_id: str, bet: int) -> bool:
+            if user_id in self.room:
+                self.room[user_id] += bet
+            else:
+                self.room[user_id] = bet
+            if len(self.room) > 1:
+                return True
+            return False
+
+        def choose_winner(self) -> tuple[int, int]:
+            total_cost = sum(self.room.values())
+            choose = random.randint(0, total_cost)
+            cumul_num = 0
+            for user_id in self.room:
+                cumul_num += self.room[user_id]
+                if choose <= cumul_num:
+                    self.room = {}
+                    return user_id, total_cost
+
+        def get_total_bet(self) -> int:
+            return sum(self.room.values())
+
+
+class Map:
     class Sector:
 
         class Building:
 
             def __init__(self, name: str, owner: Player, building_type: str):
-                self.name = name
+                self.name: str = name
                 self.firstname: str = name
-                self.owner = owner
-                self.building_type = building_type
-                self.items = [Item("Снюс", 300)]
-                self.materia_count = 10
+                self.owner: Player = owner
+                self.building_type: str = building_type
+                self.items: [Item] = [Item("Снюс", 300)]
+                self.room: Room = Room()
+
             def add_item(self, item: Item):
                 self.items.append(item)
+
             def get_items(self):
                 return self.items
 
-        #дополнительно - карта высот
+#дополнительно - карта высот
         def __init__(self, x: int, y: int, fraction: Fraction):
             self.x = x
             self.y = y
@@ -147,15 +199,19 @@ class Map:
             self.fraction = fraction
             self.basic_def = 1
             #ЗАВИСИТ ОТ ВЫСОТЫ
+
         def build(self, build: Building):
             self.building = build
+
         def destroy(self):
             self.building = self.Building("Ничего", None, "void")
+
         def get_defense(self) -> int:
             value: int = 0
             for i in self.warriors:
-                value+=i.power
+                value += i.power
             return value
+
         def new_warrior(self, warrior: Warrior):
             self.warriors.append(warrior)
 
@@ -174,37 +230,41 @@ class Map:
             self.map.append(temp)
 
     def capture_sector(self, winner: Fraction, x: int, y: int, ):
-        if self.map[y][x].fraction.getbase()==(x, y):
+        if self.map[y][x].fraction.getbase() == (x, y):
             for player in self.map[y][x].fraction.players:
                 player.fraction = winner
             try:
                 self.map[y][x].fraction.owner.transfer_money(winner.owner, self.map[y][x].fraction.owner.balance)
                 self.map[y][x].fraction.owner.fraction = winner
 
-            except: pass
+            except:
+                pass
             self.annihilate_clan(self.map[y][x].fraction)
 
         self.map[y][x].fraction = winner
         self.map[y][x].warriors = []
         self.map[y][x].destroy()
+
     def annihilate_clan(self, fraction: Fraction):
         for y in range(self.size_y):
             for x in range(self.size_x):
                 if self.map[y][x].fraction == fraction:
-                    self.map[y][x].fraction=self.fraction_list[0]
+                    self.map[y][x].fraction = self.fraction_list[0]
         self.fraction_list.remove(fraction)
 
     def count_sectors(self, fraction: Fraction) -> int:
         counter: int = 0
         for y in range(self.size_y):
             for x in range(self.size_x):
-                if self.map[y][x].fraction == fraction: counter+=1
+                if self.map[y][x].fraction == fraction: counter += 1
         return counter
 
     def get_sector(self, x: int, y: int) -> Sector:
         return self.map[y][x]
+
     def create_clan(self, fraction: Fraction) -> Fraction:
         self.fraction_list.append(fraction)
         self.capture_sector(fraction, fraction.x, fraction.y)
-        self.get_sector(fraction.y, fraction.x).build(Map.Sector.Building(f"База клана {fraction.name}", owner=fraction.owner, building_type="spawn"))
+        self.get_sector(fraction.y, fraction.x).build(
+            Map.Sector.Building(f"База клана {fraction.name}", owner=fraction.owner, building_type="spawn"))
         return fraction

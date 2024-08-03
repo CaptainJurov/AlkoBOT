@@ -8,7 +8,10 @@ from Text import OnlyText
 from Modules import Classes, Mechanic
 from aiogram.filters import StateFilter
 
+
 router = Router()
+
+
 class Buildings(aiogram.filters.state.StatesGroup):
     working = aiogram.filters.state.State()
     choosing = aiogram.filters.state.State()
@@ -16,6 +19,8 @@ class Buildings(aiogram.filters.state.StatesGroup):
     settings = aiogram.filters.state.State()
     settings_rename = aiogram.filters.state.State()
     settings_accept = aiogram.filters.state.State()
+
+
 @router.message(aiogram.filters.StateFilter(Buildings.settings))
 async def building_settings(msg: types.Message, state=FSMContext):
     text = msg.text
