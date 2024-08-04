@@ -2,6 +2,8 @@ import aiogram
 from aiogram import types, Router
 from aiogram.fsm.context import FSMContext
 import random
+
+import Hip
 from Hip import bot, Map, players
 from Text import OnlyText
 from Modules import Classes, Interface
@@ -58,6 +60,20 @@ async def casic_bet(msg: types.Message, state=FSMContext):
             else:
                 await msg.answer("Ебаклак блять, чё ты ставить пытаешся, кого наёбываешь сучара", reply_markup=OnlyText.keyboard)
                 await state.clear()
+                return None
         else:
             await state.clear()
             await Interface.main_page(msg)
+            return None
+    match choose:
+        case "Global":
+            Hip.glob_room.append_user(user_id=msg.from_user.id, bet=bet)
+        case "Local":
+            sector.building.room.append_user(msg.from_user.id, bet=bet)
+        case "Paper":
+            pass
+        case "Ochko":
+            pass
+        case _:
+            await Interface.main_page(msg)
+            await state.clear()
