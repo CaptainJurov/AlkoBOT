@@ -83,14 +83,16 @@ async def casic_bet(msg: types.Message, state=FSMContext):
     match choose:
         case "Global":
             player.balance-=bet
-            Hip.glob_room.append_user(user_id=msg.from_user.id, bet=bet, bot=bot, players=players)
             await msg.answer("Ставка сделана", reply_markup=OnlyText.keyboard)
             await state.clear()
+            await Hip.glob_room.append_user(user_id=msg.from_user.id, bet=bet, bot=bot, players=players)
+
         case "Local":
             player.balance-=bet
-            sector.building.room.append_user(msg.from_user.id, bet=bet, bot=bot, players=players)
             await msg.answer("Ставка сделана", reply_markup=OnlyText.keyboard)
             await state.clear()
+            await sector.building.room.append_user(msg.from_user.id, bet=bet, bot=bot, players=players)
+
         case "Paper":
             await state.clear()
         case "Ochko":

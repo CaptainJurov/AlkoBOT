@@ -20,7 +20,7 @@ async def inter_choose_warriors(msg: types.Message, state=FSMContext):
     text = msg.text
     if text=="Отмена":
         await state.clear()
-        await main_page()
+        await main_page(msg)
         return False
     warrior = player.warriors
     founded = False
