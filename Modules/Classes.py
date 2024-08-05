@@ -154,7 +154,7 @@ class Room:
         self.room: {int: int} = {}
         self.time: float = 0
         self.started: bool = False
-        self.kd = 10
+        self.kd = 600
 
     async def append_user(self, user_id: str, bet: int, bot: aiogram.Bot, players: {int: Player}):
         if user_id in self.room:
