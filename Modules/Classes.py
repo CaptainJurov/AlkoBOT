@@ -1,5 +1,10 @@
+import asyncio
 import random
-from Modules import Timer
+import threading
+import time
+
+import aiogram
+
 
 class Warrior:
     def __init__(self, name: str, power: int, price: int, entity=None):
@@ -145,31 +150,50 @@ class Player:
 
 class Room:
 
-        def __init__(self):
-            self.room: {int: int} = {}
-            
-        def append_user(self, user_id: str, bet: int) -> bool:
-            if user_id in self.room:
-                self.room[user_id] += bet
-            else:
-                self.room[user_id] = bet
-            if len(self.room) > 1:
-                return True
-            return False
+    def __init__(self):
+        self.room: {int: int} = {}
+        self.time: float = 0
+        self.started: bool = False
+        self.kd = 10
 
-        def choose_winner(self) -> tuple[int, int]:
-            total_cost = sum(self.room.values())
-            choose = random.randint(0, total_cost)
-            cumul_num = 0
-            for user_id in self.room:
-                cumul_num += self.room[user_id]
-                if choose <= cumul_num:
-                    self.room = {}
-                    return user_id, total_cost
+    def append_user(self, user_id: str, bet: int, bot: aiogram.Bot, players: {int: Player}):
+        if user_id in self.room:
+            self.room[user_id] += bet
+        else:
+            self.room[user_id] = bet
+        if len(self.room)==2:
+            self.started = True
+            self.timer = threading.Timer(self.kd, self.choose_winner, args=(bot, players))
+            self.time = time.time()
+            self.timer.start()
 
-        def get_total_bet(self) -> int:
-            return sum(self.room.values())
+    def choose_winner(self, bot: aiogram.Bot, players: {int: Player}) -> None:
+        self.started = False
+        total_cost = sum(self.room.values())
+        choose = random.randint(0, total_cost)
+        cumul_num = 0
+        for user_id in self.room:
+            cumul_num += self.room[user_id]
+            if choose <= cumul_num:
+                winner: Player = players[user_id]
+                winner.balance+=total_cost
+                asyncio.run(bot.send_message(chat_id=user_id, text=f"[Рулетка]\nНихуясебе, ты выиграл в рулетке {total_cost} шекелей, не пропей всё разом"))
 
+                del self.room[user_id]
+                break
+        for loser in self.room:
+            asyncio.run(bot.send_message(chat_id=loser, text=f"[Рулетка]\nЛох ебаный проебал ставку\nТем временем победитель забрал себе на руки {total_cost}"))
+        self.room = {}
+
+    def get_total_bet(self) -> int:
+        return sum(self.room.values())
+
+    def get_time(self) -> int:
+        if self.time == 0:
+            return self.kd
+        return int(self.kd-(time.time()-self.time))
+    def get_status(self) -> bool:
+        return self.started
 
 class Map:
     class Sector:

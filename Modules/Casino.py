@@ -1,15 +1,26 @@
+import asyncio
+
 import aiogram
 from aiogram import types, Router
 from aiogram.fsm.context import FSMContext
 import random
-
+import threading
 import Hip
 from Hip import bot, Map, players
 from Text import OnlyText
-from Modules import Classes, Interface
+from Modules import Classes, Interface, Timer
 from aiogram.filters import StateFilter
 
 router = Router()
+
+
+
+def award_winner(user_id: int, total_cost: int) -> Classes.Player:
+    player: Classes.Player = players[user_id]
+    player.balance += total_cost
+    asyncio.run(bot.send_message(chat_id=user_id, text=f"Всё заебок, твоя ставка стрельнула и ты выиграл {total_cost:,} шекелей, не пропей всё разом"))
+    return player
+
 class Casino(aiogram.filters.state.StatesGroup):
     choose = aiogram.filters.state.State()
     bet = aiogram.filters.state.State()
@@ -46,17 +57,21 @@ async def interact_enter(msg: types.Message, state=FSMContext):
 
 @router.message(aiogram.filters.StateFilter(Casino.bet))
 async def casic_bet(msg: types.Message, state=FSMContext):
-    choose = await state.get_state()["Choose"]
+    choose = (await state.get_data())["Choose"]
     player = players[msg.from_user.id]
     sector = Map.get_sector(player.x, player.y)
     text = msg.text
     bet = None
     if text.isdigit():
-        text = int(text)
+        bet = int(text)
+        if not(bet>0 and player.balance>=bet):
+            await msg.answer("Хуеплёт нищий пытается наебать дохуя мудрую систему", reply_markup=OnlyText.keyboard)
+            await state.clear()
     else:
         if text=="Поставить всё":
             if player.balance>0:
                 bet = player.balance
+
             else:
                 await msg.answer("Ебаклак блять, чё ты ставить пытаешся, кого наёбываешь сучара", reply_markup=OnlyText.keyboard)
                 await state.clear()
@@ -67,13 +82,19 @@ async def casic_bet(msg: types.Message, state=FSMContext):
             return None
     match choose:
         case "Global":
-            Hip.glob_room.append_user(user_id=msg.from_user.id, bet=bet)
+            player.balance-=bet
+            Hip.glob_room.append_user(user_id=msg.from_user.id, bet=bet, bot=bot, players=players)
+            await msg.answer("Ставка сделана", reply_markup=OnlyText.keyboard)
+            await state.clear()
         case "Local":
-            sector.building.room.append_user(msg.from_user.id, bet=bet)
+            player.balance-=bet
+            sector.building.room.append_user(msg.from_user.id, bet=bet, bot=bot, players=players)
+            await msg.answer("Ставка сделана", reply_markup=OnlyText.keyboard)
+            await state.clear()
         case "Paper":
-            pass
+            await state.clear()
         case "Ochko":
-            pass
+            await state.clear()
         case _:
             await Interface.main_page(msg)
             await state.clear()

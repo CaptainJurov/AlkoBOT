@@ -7,7 +7,7 @@ from aiogram.types import TelegramObject
 import config
 from Hip import dp, bot
 from aiogram.fsm.context import FSMContext
-from Modules import Interface, Clan_Handler, Building_Handler, Interact_Handler, Moving_Handler
+from Modules import Interface, Clan_Handler, Building_Handler, Interact_Handler, Moving_Handler, Casino
 class SomeMiddleware(aiogram.BaseMiddleware):
     async def __call__(
         self,
@@ -27,9 +27,9 @@ async def main():
     dp.callback_query.middleware(SomeMiddleware())
     dp.include_router(Clan_Handler.router)
     dp.include_router(Interface.router)
-
     dp.include_router(Building_Handler.router)
     dp.include_router(Interact_Handler.router)
+    dp.include_router(Casino.router)
     dp.include_router(Moving_Handler.router)
     await dp.start_polling(bot)
 if __name__ == "__main__":

@@ -78,7 +78,7 @@ async def inter_choose(msg: types.Message, state=FSMContext):
                 kb.append([types.KeyboardButton(text=f"{i.name}")])
             text_to_send+=f"Ассортимент:\n{Mechanic.get_shop(sector)}"
             #kb = [[types.KeyboardButton(text=)]]
-        if building_type=="tavern" or building_type=="casino" or building_type=="bank":
+        if building_type=="tavern" or building_type=="bank":
             await msg.answer("coming soon")
             await state.clear()
             return False
@@ -90,7 +90,20 @@ async def inter_choose(msg: types.Message, state=FSMContext):
             for i in player.fraction.warriors_types:
                 kb.append([types.KeyboardButton(text=f"{i.name}")])
                 text_to_send+=f"\n{i.get_name()} - сила: {i.power}; цена - {i.price}"
+        if building_type=="casino":
+            await state.set_state(Casino.choose)
+            kb = [
+                [types.KeyboardButton(text="Рулетка(Глобальная)")],
 
+                [types.KeyboardButton(text="Рулетка(В секторе)")],
+                [types.KeyboardButton(text="Камень/Ножницы/Бумага")],
+
+                [types.KeyboardButton(text="Очко")]
+
+            ]
+            text_to_send = f"Ебать нахуй, homo ludens решил посетить естественную среду обитания\nВыбирай в каком режиме сосать будешь\n\n{OnlyText.casic_rejim} \n"
+            text_to_send+= f"Бюджет рулетки в глобале: {Hip.glob_room.get_total_bet()}, {str(Hip.glob_room.get_time())+' секунд осталось' if Hip.glob_room.get_status() else 'Ожидание игроков'}\n"
+            text_to_send+= f"Бюджет локальной рулетки {sector.building.room.get_total_bet()}, {str(sector.building.room.get_total_bet())+' секунд осталось' if sector.building.room.get_status() else 'Ожидание игроков'}"
         if kb!=OnlyText.keyboard: kb.append([types.KeyboardButton(text="Отмена")])
         await msg.answer(text_to_send, reply_markup=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True))
     if text=="построить чёта)":
@@ -178,20 +191,6 @@ async def interact_enter(msg: types.Message, state=FSMContext):
                 else:
                     await msg.answer("хуила нищая сьеби с магазина нахуй", reply_markup=OnlyText.keyboard)
         await state.clear()
-    if sector.building.building_type=="casino":
-        await state.set_state(Casino.choose)
-        kb = [
-            [types.KeyboardButton(text="Рулетка(Глобальная)")],
-
-            [types.KeyboardButton(text="Рулетка(В секторе)")],
-            [types.KeyboardButton(text="Камень/Ножницы/Бумага")],
-
-            [types.KeyboardButton(text="Очко")],
-            [types.KeyboardButton(text="Отмена")]
-
-        ]
-        await msg.answer(f"Ебать нахуй, homo ludens решил посетить естественную среду обитания\nВыбирай в каком режиме сосать будешь\n\n{OnlyText.casic_rejim} ", reply_markup=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True))
-
 
 @router.message(aiogram.filters.StateFilter(Interact.build))
 async def interact_building(msg: types.Message, state=FSMContext):

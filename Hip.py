@@ -32,7 +32,7 @@ def get_all():
     for i in buildings:
         text+=f"{buildings[i].name} - стоит {buildings[i].price:,} шекелей\n"
     return text
-players = {0: Classes.Player(0, Map.fraction_list[0], "Server")}
+players: {int: Classes.Player} = {0: Classes.Player(0, Map.fraction_list[0], "Server")}
 Map.create_clan(Classes.Fraction("Хряки", 0, 0, player=players[0]))
 Map.create_clan(Classes.Fraction("Медведи", 1, 1, player=players[0]))
 class Interact(aiogram.filters.state.StatesGroup):

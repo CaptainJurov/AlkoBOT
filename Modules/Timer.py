@@ -1,11 +1,12 @@
 import time
 import threading
+from typing import Callable
 
 
 class Timer:
     class Point:
         def __init__(self, func, user_id: int = None, *args):
-            self.func = func
+            self.func: Callable = func
             self.user_id: int = user_id
             self.args = args
 
@@ -24,11 +25,8 @@ class Timer:
         self.timer.start()
 
     def add_timer(self, point: Point, time_point: int = 1):
-        timer = int(time.time())
-        try:
-            self.items[timer+time_point].append(point)
-        except:
-            self.items[timer+time_point] = [point]
+        timer = int(time.time()) + time_point
+        self.items.setdefault(timer, []).append(point)
 
     def update_kd(self):
         timer = int(time.time())
