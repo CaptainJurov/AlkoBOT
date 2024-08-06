@@ -3,9 +3,9 @@ import asyncio
 from typing import Callable, Dict, Any, Awaitable
 import Hip
 from aiogram.types import TelegramObject
-
+import time
 import config
-from Hip import dp, bot
+from Hip import dp, bot, players
 from aiogram.fsm.context import FSMContext
 from Modules import Interface, Clan_Handler, Building_Handler, Interact_Handler, Moving_Handler, Casino
 class SomeMiddleware(aiogram.BaseMiddleware):
@@ -16,6 +16,14 @@ class SomeMiddleware(aiogram.BaseMiddleware):
         data: Dict[str, Any]
     ) -> Any:
         id = data['event_context'].chat.id
+        if int(id) in players:
+            player = players[int(id)]
+            if not(player.playable):
+                if int(time.time()) >= player.time:
+                    player.playable = True
+                else:
+                    result = await bot.send_message(id, text=f"Погоди малясь, осталось {int(player.time-int(time.time()))} секунд")
+                    return result
         if int(id) in Hip.banned:
             result = await bot.send_message(id, text="Ты забанен)")
         else:

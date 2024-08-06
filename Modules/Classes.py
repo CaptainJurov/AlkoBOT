@@ -100,7 +100,7 @@ class Player:
         self.leader: int = 5
         self.balance: int = 100
         self.playable: bool = True
-
+        self.time: int = int(time.time())
     def move(self, delta_x: int, delta_y: int):
         self.x += delta_x
         self.y += delta_y
@@ -230,6 +230,7 @@ class Map:
             self.building = self.Building("Ничего", None, "void")
             self.fraction = fraction
             self.basic_def = 1
+            self.dynamic_def = 0
             #ЗАВИСИТ ОТ ВЫСОТЫ
 
         def build(self, build: Building):
@@ -237,7 +238,6 @@ class Map:
 
         def destroy(self):
             self.building = self.Building("Ничего", None, "void")
-
         def get_defense(self) -> int:
             value: int = 0
             for i in self.warriors:
