@@ -1,3 +1,7 @@
+import asyncio
+import threading
+import time
+
 import aiogram
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
@@ -154,8 +158,17 @@ async def interact_enter(msg: types.Message, state=FSMContext):
     sector = Map.get_sector(player.x, player.y)
     if sector.building.building_type=="work":
         if text.lower()=="работать":
-            await msg.answer("Всё ахуенно, ты батрачишь")
-            await state.set_state(Buildings.working)
+            player.playable = False
+            player.time = time.time()+30
+            await msg.answer("Ты будешь ебашить 30 секунд, ожидируй")
+            await state.clear()
+            await asyncio.sleep(30)
+            coin = Hip.Coin.get_course()
+            player.balance+=coin
+            player.playable = True
+            sector.building.owner.balance+=int(coin*0.25)
+            await msg.answer(f"Ты ахуенно поработал и получил 1 гойдакоин({coin} шекелей)", reply_markup=OnlyText.keyboard)
+
         else:
             await state.clear()
             await msg.answer("Ссыкло ебливое убежал к мамочке плакаться на могилку", reply_markup=OnlyText.keyboard)

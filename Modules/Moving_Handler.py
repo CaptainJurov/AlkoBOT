@@ -33,6 +33,9 @@ async def moving_choose(msg: types.Message, state=FSMContext):
         await msg.answer("Ок", reply_markup=OnlyText.keyboard)
         return False
     sector = Map.get_sector(player.x+direct[0], player.y+direct[1])
+    if sector.basic_def==0:
+        await msg.answer("В этот сектор не попасть)", reply_markup=OnlyText.keyboard)
+        return None
     kd = 30 * (sector.basic_def / 2)
     if sector.building.building_type=="road":
         kd = 10 * (sector.basic_def / 2)

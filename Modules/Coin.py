@@ -17,6 +17,8 @@ class Coin:
         del self.course[0]
         course_delta = (self.political_correct())*self.range_correct_system()+self.player_influence_correcting()+self.random_correct()
         self.course.append(int(self.political_correct()+course_delta))
+        if self.course[-1]<100:
+            self.course[-1]=1000
         self.timer = threading.Timer(self.kd_timer, self.update_course)
         self.timer.start()
 
