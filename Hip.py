@@ -2,24 +2,24 @@ from config import keys
 from aiogram import Bot, Dispatcher
 import aiogram
 from aiogram.fsm.storage.memory import MemoryStorage
-from Modules import Classes, Timer
+from Modules import Classes, Timer, Coin
 print("loaded")
 Clock = Timer.Timer()
 glob_room = Classes.Room()
 Map = Classes.Map(100, 100)
-
+Coin = Coin.Coin(map=Map)
 class Building:
     def __init__(self, name: str, type: str, price: int):
         self.name: str = name
         self.type: str = type
         self.price: int = price
 buildings = {
-    "Завод" :Building("Завод", "work", 100_000_000),
-    "Магазин": Building("Магазин", "shop", 10_000_000),
-    "Банк": Building("Банк", "bank", 1_000_000_000),
-    "Шахта": Building("Шахта", "mine", 100_000_000),
-    "Казино": Building("Казино", "casino", 1_000_000_000),
-    "Дорога": Building("Дорога", "road", 10_000_000),
+    "Завод" :Building("Завод", "work", 1_000_000),
+    "Магазин": Building("Магазин", "shop", 1_000_000),
+    "Банк": Building("Банк", "bank", 50_000_000),
+    "Шахта": Building("Шахта", "mine", 25_000_000),
+    "Казино": Building("Казино", "casino", 100_000_000),
+    "Дорога": Building("Дорога", "road", 100_000),
     "Призывной пункт": Building("Призывной пункт", "warriors", 100_000_000),
     "Бесполезная постройка": Building("Фонтан", "useless", 1_000_000)
 }

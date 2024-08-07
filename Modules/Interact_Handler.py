@@ -27,7 +27,6 @@ async def inter_choose_warriors(msg: types.Message, state=FSMContext):
     i: Classes.Warrior
     for i in range(len(warrior)):
         if text == player.warriors[i].name:
-            player.balance += player.warriors[i].price
             sector.new_warrior(player.warriors.pop(i))
             founded=True
             break
@@ -35,7 +34,7 @@ async def inter_choose_warriors(msg: types.Message, state=FSMContext):
         await msg.answer("Солдат не найден(Отряд не заметил потери бойца)", reply_markup=OnlyText.keyboard)
         await state.clear()
     else:
-        await msg.answer("Родина-клан гордится вами\nБаланс пополнен", reply_markup=OnlyText.keyboard)
+        await msg.answer("Родина-клан гордится вами\n", reply_markup=OnlyText.keyboard)
         await state.clear()
 
 
@@ -72,6 +71,8 @@ async def inter_choose(msg: types.Message, state=FSMContext):
         text_to_send = f"Ты зашел в {sector.building.name}\nВладелец: {vladelec}\n"
         if building_type=="spawn" or building_type=="void" or building_type=="road":
             await state.clear()
+        if building_type=="useless":
+            await state.clear()
         if building_type=="shop":
             kb = []
             for i in sector.building.items:
@@ -96,15 +97,12 @@ async def inter_choose(msg: types.Message, state=FSMContext):
                 [types.KeyboardButton(text="Рулетка(Глобальная)")],
 
                 [types.KeyboardButton(text="Рулетка(В секторе)")],
-                [types.KeyboardButton(text="Камень/Ножницы/Бумага")],
-
-                [types.KeyboardButton(text="Очко")]
 
             ]
             text_to_send = f"Ебать нахуй, homo ludens решил посетить естественную среду обитания\nВыбирай в каком режиме сосать будешь\n\n{OnlyText.casic_rejim} \n"
             text_to_send+= f"Бюджет рулетки в глобале: {Hip.glob_room.get_total_bet()}, {str(Hip.glob_room.get_time())+' секунд осталось' if Hip.glob_room.get_status() else 'Ожидание игроков'}\n"
             text_to_send+= f"Бюджет локальной рулетки {sector.building.room.get_total_bet()}, {str(sector.building.room.get_total_bet())+' секунд осталось' if sector.building.room.get_status() else 'Ожидание игроков'}"
-        if kb!=OnlyText.keyboard: kb.append([types.KeyboardButton(text="Отмена")])
+        if kb!=OnlyText.main_kb: kb.append([types.KeyboardButton(text="Отмена")])
         await msg.answer(text_to_send, reply_markup=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True))
     if text=="построить чёта)":
         await state.set_state(Interact.build)
@@ -120,7 +118,7 @@ async def inter_choose(msg: types.Message, state=FSMContext):
         keyboard = types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
         await msg.answer(f"Смелое решение\nВ этом секторе сидят {len(sector.warriors)} вояк\nВсё еще хочешь этот сектор?", reply_markup=keyboard)
 
-    if text=="меню постройки" and player==player.fraction.owner:
+    if text=="меню постройки" and player==sector.building.owner:
         await state.set_state(Buildings.settings)
         kb=[[types.KeyboardButton(text="Переименовать")], [types.KeyboardButton(text="Продать к хуям")]]
         keyboard=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True)
@@ -170,6 +168,7 @@ async def interact_enter(msg: types.Message, state=FSMContext):
                 if player.balance>=i.price:
                     player.new_warrior(i)
                     player.balance-=i.price
+                    sector.building.owner.balance+=(i.price)*0.5
                     await msg.answer(f"Успешно куплен {i.name}|{i.power}\nПроверь статус отряда", reply_markup=OnlyText.keyboard)
                 else:
                     await msg.answer("Нищеебина сьеби с сектора", reply_markup=OnlyText.keyboard)
@@ -186,11 +185,12 @@ async def interact_enter(msg: types.Message, state=FSMContext):
                 if player.balance>=towar.cost:
                     player.backpack.append(towar)
                     player.balance-=towar.cost
-                    sector.building.owner.balance+=(towar.cost*0.1)
+                    sector.building.owner.balance+=(towar.cost*0.5)
                     await msg.answer(f"Товар куплен, текущий баланс: \n{player.balance} шекелей", reply_markup=OnlyText.keyboard)
                 else:
                     await msg.answer("хуила нищая сьеби с магазина нахуй", reply_markup=OnlyText.keyboard)
         await state.clear()
+
 
 @router.message(aiogram.filters.StateFilter(Interact.build))
 async def interact_building(msg: types.Message, state=FSMContext):

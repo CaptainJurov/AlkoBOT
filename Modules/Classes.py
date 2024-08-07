@@ -172,7 +172,7 @@ class Room:
     async def choose_winner(self, bot: aiogram.Bot, players: {int: Player}) -> None:
         await asyncio.sleep(self.kd)
         self.started = False
-        total_cost = sum(self.room.values())
+        total_cost = int(sum(self.room.values()))
         choose = random.randint(0, total_cost)
         cumul_num = 0
         for user_id in self.room:
