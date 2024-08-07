@@ -3,10 +3,11 @@ import Hip
 def capture(player: Classes.Player, sector: Classes.Map.Sector):
     player_atk = player.total_power()+player.power
     sector_def = sector.get_defense()*sector.basic_def
-    player_count = len(player.warriors)
+    player_count = len(player.warriors)+1
     sector_count = len(sector.warriors)
     if sector_count==0:
         Hip.Map.capture_sector(player.fraction, player.x, player.y)
+        player.balance+=1000
         return True
     power_count_defender = player_atk/sector_count
     power_count_attacker = sector_def/player_count
@@ -18,6 +19,8 @@ def capture(player: Classes.Player, sector: Classes.Map.Sector):
             del player.warriors[i]
     if len(sector.warriors)==0:
         Hip.Map.capture_sector(player.fraction, player.x, player.y)
+        player.balance+=sector_def*1000
+        player.fraction.owner.balance+=sector_def*500
         return True
     elif len(player.warriors)==0:
         player.x, player.y = player.fraction.getbase()

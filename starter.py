@@ -7,7 +7,7 @@ import time
 import config
 from Hip import dp, bot, players
 from aiogram.fsm.context import FSMContext
-from Modules import Interface, Clan_Handler, Building_Handler, Interact_Handler, Moving_Handler, Casino
+from Modules import Interface, Clan_Handler, Building_Handler, Interact_Handler, Moving_Handler, Casino, Bank
 class SomeMiddleware(aiogram.BaseMiddleware):
     async def __call__(
         self,
@@ -37,6 +37,7 @@ async def main():
     dp.include_router(Interface.router)
     dp.include_router(Building_Handler.router)
     dp.include_router(Interact_Handler.router)
+    dp.include_router(Bank.router)
     dp.include_router(Casino.router)
     dp.include_router(Moving_Handler.router)
     await dp.start_polling(bot)

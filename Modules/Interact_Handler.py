@@ -12,7 +12,7 @@ from Text import OnlyText
 from Modules.Building_Handler import Buildings
 from Modules.Casino import Casino
 from Modules.Interface import main_page
-from Modules import Classes, Mechanic
+from Modules import Classes, Mechanic, Bank
 from aiogram.filters import StateFilter
 
 router = Router()
@@ -106,6 +106,15 @@ async def inter_choose(msg: types.Message, state=FSMContext):
             text_to_send = f"Ебать нахуй, homo ludens решил посетить естественную среду обитания\nВыбирай в каком режиме сосать будешь\n\n{OnlyText.casic_rejim} \n"
             text_to_send+= f"Бюджет рулетки в глобале: {Hip.glob_room.get_total_bet()}, {str(Hip.glob_room.get_time())+' секунд осталось' if Hip.glob_room.get_status() else 'Ожидание игроков'}\n"
             text_to_send+= f"Бюджет локальной рулетки {sector.building.room.get_total_bet()}, {str(sector.building.room.get_total_bet())+' секунд осталось' if sector.building.room.get_status() else 'Ожидание игроков'}"
+        if building_type=="bank":
+            await state.set_state(Bank.Bank.buying)
+            kb = [[
+                types.KeyboardButton(text="Купить гойдакоин")
+            ],
+            [
+                types.KeyboardButton(text="Продать гойдакоин")
+            ]]
+            text_to_send = f"Ты зашел в обвешанное золотом, на манер цыганского дома, здание с громадными буквами '{sector.building.name}' на крыше\n\nСейчас Гойдакоин стоит: {Hip.Coin.get_course()} шекелей\nУ тебя в кармане коинов: {player.coins}\nчо делать будешь? "
         if kb!=OnlyText.main_kb: kb.append([types.KeyboardButton(text="Отмена")])
         await msg.answer(text_to_send, reply_markup=types.ReplyKeyboardMarkup(keyboard=kb, resize_keyboard=True))
     if text=="построить чёта)":

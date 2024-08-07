@@ -99,6 +99,7 @@ class Player:
         self.backpack: [Item] = []
         self.leader: int = 5
         self.balance: int = 100
+        self.coins = 1
         self.playable: bool = True
         self.time: int = int(time.time())
     def move(self, delta_x: int, delta_y: int):
