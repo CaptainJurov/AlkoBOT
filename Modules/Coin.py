@@ -5,6 +5,7 @@ import random
 from Modules import Classes
 logging.basicConfig(format='%(asctime)s - [%(levelname)s] - %(message)s', level=logging.DEBUG, filemode="w", filename="bot_log.log")
 
+
 class Coin:
     def __init__(self, map: Classes.Map, course = [1000]*(60*24)):
         self.kd_timer = 60

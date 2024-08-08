@@ -15,6 +15,7 @@ except:
 try:
     with open("Coin.pickle", "rb") as file:
         goyda = pickle.load(file)
+
         Coin = Coin.Coin( map=Map, course=goyda)
 except:
     Coin = Coin.Coin(map=Map)

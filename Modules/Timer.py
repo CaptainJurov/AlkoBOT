@@ -3,6 +3,7 @@ import threading
 from typing import Callable
 import pickle
 
+
 class Timer:
 
     def __init__(self, Map, players, Coin):
