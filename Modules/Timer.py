@@ -13,11 +13,8 @@ class Timer:
     def update_kd(self, Map, players, Coin):
         print("saving...")
         with open("Map.pickle", "wb") as file:
-            pickle.dump(Map, file)
-        with open("Coin.pickle", "wb") as file:
-            pickle.dump(Coin.course, file)
-        with open("Players.pickle", "wb") as file:
-            pickle.dump(players, file)
+            goal = [Map, Coin, players]
+            pickle.dump(goal, file)
         print("saved")
         self.timer = threading.Timer(150, self.update_kd, args=(Map, players, Coin))
         self.timer.start()

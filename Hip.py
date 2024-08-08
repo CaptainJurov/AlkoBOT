@@ -8,17 +8,17 @@ print("loaded")
 
 glob_room = Classes.Room()
 try:
-    with open("Map.pickle", "rb") as file:
-        Map = pickle.load(file)
+    with open("zov.pickle", "rb") as file:
+
+        goal = pickle.load(file)
+        Map = goal[0]
+        Coin = Coin.Coin(map=Map, course=goal[1])
+        players = goal[2]
 except:
     Map = Classes.Map(100, 100)
-try:
-    with open("Coin.pickle", "rb") as file:
-        goyda = pickle.load(file)
-
-        Coin = Coin.Coin( map=Map, course=goyda)
-except:
     Coin = Coin.Coin(map=Map)
+    players: {int: Classes.Player} = {0: Classes.Player(0, Map.fraction_list[0], "Server")}
+
 class Building:
     def __init__(self, name: str, type: str, price: int):
         self.name: str = name
@@ -43,11 +43,7 @@ def get_all():
     for i in buildings:
         text+=f"{buildings[i].name} - стоит {buildings[i].price:,} шекелей\n"
     return text
-try:
-    with open("Players.pickle", "rb") as file:
-        players = pickle.load(file)
-except:
-    players: {int: Classes.Player} = {0: Classes.Player(0, Map.fraction_list[0], "Server")}
+
 Clock = Timer.Timer(Map, players, Coin)
 Map.create_clan(Classes.Fraction("Хряки", 25, 25, player=players[0]))
 Map.create_clan(Classes.Fraction("Медведи", 75, 75, player=players[0]))
