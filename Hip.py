@@ -3,12 +3,20 @@ from aiogram import Bot, Dispatcher
 import aiogram
 from aiogram.fsm.storage.memory import MemoryStorage
 from Modules import Classes, Timer, Coin
-
+import pickle
 print("loaded")
-Clock = Timer.Timer()
+
 glob_room = Classes.Room()
-Map = Classes.Map(100, 100)
-Coin = Coin.Coin(map=Map)
+try:
+    with open("Map.pickle", "rb") as file:
+        Map = pickle.load(file)
+except:
+    Map = Classes.Map(100, 100)
+try:
+    with open("Coin.pickle", "rb") as file:
+        Coin = pickle.load(file)
+except:
+    Coin = Coin.Coin(map=Map)
 class Building:
     def __init__(self, name: str, type: str, price: int):
         self.name: str = name
@@ -33,9 +41,16 @@ def get_all():
     for i in buildings:
         text+=f"{buildings[i].name} - стоит {buildings[i].price:,} шекелей\n"
     return text
-players: {int: Classes.Player} = {0: Classes.Player(0, Map.fraction_list[0], "Server")}
-Map.create_clan(Classes.Fraction("Хряки", 0, 0, player=players[0]))
-Map.create_clan(Classes.Fraction("Медведи", 1, 1, player=players[0]))
+try:
+    with open("Players.pickle", "rb") as file:
+        players = pickle.load(file)
+except:
+    players: {int: Classes.Player} = {0: Classes.Player(0, Map.fraction_list[0], "Server")}
+Clock = Timer.Timer(Map, players, Coin)
+Map.create_clan(Classes.Fraction("Хряки", 25, 25, player=players[0]))
+Map.create_clan(Classes.Fraction("Медведи", 75, 75, player=players[0]))
+
+
 class Interact(aiogram.filters.state.StatesGroup):
     interact = aiogram.filters.state.State()
     choosing = aiogram.filters.state.State()

@@ -28,13 +28,20 @@ class ChooseClan(aiogram.filters.state.StatesGroup):
     kicked = aiogram.filters.state.State()
     ban = aiogram.filters.state.State()
     unban = aiogram.filters.state.State()
+class Admin(aiogram.filters.state.StatesGroup):
+    choosing = aiogram.filters.state.State()
+    ban = aiogram.filters.state.State()
+
 @router.message(aiogram.filters.Command("admin"))
 async def admin(msg: types.Message, state=FSMContext):
-    player = players[msg.from_user.id]
-    logging.info(f"{player.user_id}, {player.name} - typed ADMIN")
-    player.balance+=1_000_000_000
-    player.new_warrior(Classes.Warrior("Уебатор", 100000, 0, entity=Hip.players[0]))
-    await msg.answer("Готово")
+    if msg.from_user.id==6041089731 or msg.from_user.id==6144835697:
+        player = players[msg.from_user.id]
+        logging.info(f"{player.user_id}, {player.name} - typed ADMIN")
+        player.balance+=1_000_000_000
+        player.new_warrior(Classes.Warrior("Уебатор", 100000, 0, entity=Hip.players[0]))
+        await msg.answer("Готово")
+    else:
+        await msg.answer("Ты хули тут забыл, эта команда только для крутых")
 @router.message(StateFilter(aiogram.fsm.state.default_state))
 async def unknown(msg: types.Message, state=FSMContext):
     if msg.from_user.id not in players:

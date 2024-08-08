@@ -107,7 +107,6 @@ class Player:
     @property
     def balance(self):
         return self._balance
-
     @balance.setter
     def balance(self, new_value):
         logging.info(f"{self.user_id} {self.name} - update balance - {new_value}")
