@@ -5,7 +5,7 @@ import time
 import logging
 import aiogram
 
-
+logging.basicConfig(level=logging.INFO, filename="bot_log.log",filemode="w")
 class Warrior:
     def __init__(self, name: str, power: int, price: int, entity=None):
         self.name: str = name
@@ -99,14 +99,23 @@ class Player:
         self.warriors: [Warrior] = []
         self.backpack: [Item] = []
         self.leader: int = 5
-        self.balance: int = 100
+        self._balance: int = 100
         self.coins = 1
         self.playable: bool = True
         self.time: int = int(time.time())
+
+    @property
+    def balance(self):
+        return self._balance
+
+    @balance.setter
+    def balance(self, new_value):
+        logging.info(f"{self.user_id} {self.name} - update balance - {new_value}")
+        self._balance = new_value
+
     def move(self, delta_x: int, delta_y: int):
         self.x += delta_x
         self.y += delta_y
-
 
     def change_playable(self, value: bool):
         self.playable = value

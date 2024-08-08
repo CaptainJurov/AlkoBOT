@@ -15,7 +15,7 @@ from Modules.Interface import main_page
 from Modules import Classes, Mechanic, Bank
 from aiogram.filters import StateFilter
 import logging
-
+logging.basicConfig(level=logging.INFO, filename="bot_log.log",filemode="w")
 router = Router()
 
 @router.message(aiogram.filters.StateFilter(Interact.warriors))

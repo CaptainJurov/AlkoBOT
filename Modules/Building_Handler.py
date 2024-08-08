@@ -9,7 +9,7 @@ from Hip import bot, Map, players
 from Text import OnlyText
 from Modules import Classes, Mechanic
 from aiogram.filters import StateFilter
-
+logging.basicConfig(level=logging.INFO, filename="bot_log.log",filemode="w")
 
 router = Router()
 

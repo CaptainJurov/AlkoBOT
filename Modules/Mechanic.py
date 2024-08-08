@@ -1,6 +1,7 @@
 from Modules import Classes
 import Hip
 import logging
+logging.basicConfig(level=logging.INFO, filename="bot_log.log",filemode="w")
 def capture(player: Classes.Player, sector: Classes.Map.Sector):
     player_atk = player.total_power()+player.power
     sector_def = sector.get_defense()*sector.basic_def

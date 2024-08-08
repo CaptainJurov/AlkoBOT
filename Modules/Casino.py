@@ -11,7 +11,7 @@ from Text import OnlyText
 from Modules import Classes, Interface, Timer
 from aiogram.filters import StateFilter
 import logging
-
+logging.basicConfig(level=logging.INFO, filename="bot_log.log",filemode="w")
 router = Router()
 
 

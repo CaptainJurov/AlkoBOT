@@ -9,7 +9,7 @@ from Text import OnlyText
 from Modules import Classes, Mechanic
 from Modules.Moving_Handler import Moving
 import logging
-
+logging.basicConfig(level=logging.INFO, filename="bot_log.log",filemode="w")
 router = Router()
 async def change_user_state(user_id: int, new_state):
     # Получаем контекст состояния для пользователя

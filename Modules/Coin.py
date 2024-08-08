@@ -3,7 +3,7 @@ import logging
 import threading
 import random
 from Modules import Classes
-
+logging.basicConfig(level=logging.INFO, filename="bot_log.log",filemode="w")
 
 class Coin:
     def __init__(self, map: Classes.Map):
@@ -20,7 +20,7 @@ class Coin:
         self.course.append(int(self.political_correct()+course_delta))
         if self.course[-1]<100:
             self.course[-1]=1000
-        logging.info(f"COIN - {int(self.political_correct()+course_delta)}")
+        logging.info(f"COIN - {self.course[-1]}")
         self.timer = threading.Timer(self.kd_timer, self.update_course)
         self.timer.start()
 
