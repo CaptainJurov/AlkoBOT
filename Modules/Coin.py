@@ -6,11 +6,11 @@ from Modules import Classes
 logging.basicConfig(format='%(asctime)s - [%(levelname)s] - %(message)s', level=logging.DEBUG, filemode="w", filename="bot_log.log")
 
 class Coin:
-    def __init__(self, map: Classes.Map):
+    def __init__(self, map: Classes.Map, course = [1000]*(60*24)):
         self.kd_timer = 60
         self.timer = threading.Timer(self.kd_timer, self.update_course)
         self.timer.start()
-        self.course = [1000]*(60*24)
+        self.course = course
         self.Map: Classes.Map = map
         self.correct_modifier = 1
 

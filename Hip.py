@@ -14,7 +14,8 @@ except:
     Map = Classes.Map(100, 100)
 try:
     with open("Coin.pickle", "rb") as file:
-        Coin = pickle.load(file)
+        goyda = pickle.load(file)
+        Coin = Coin.Coin( map=Map, course=goyda)
 except:
     Coin = Coin.Coin(map=Map)
 class Building:

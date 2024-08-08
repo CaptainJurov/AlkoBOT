@@ -14,7 +14,7 @@ class Timer:
         with open("Map.pickle", "wb") as file:
             pickle.dump(Map, file)
         with open("Coin.pickle", "wb") as file:
-            pickle.dump(Coin, file)
+            pickle.dump(Coin.course, file)
         with open("Players.pickle", "wb") as file:
             pickle.dump(players, file)
         print("saved")
