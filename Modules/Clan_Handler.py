@@ -94,6 +94,7 @@ async def choosing(msg: types.Message, state=FSMContext):
         await msg.answer(f"Умный дохуя?")
     except:
         await msg.answer("Долбаеб блять жми кнопки и выбирай по человечески")
+
 @router.message(aiogram.filters.StateFilter(ChooseClan.nickname))
 async def choosing_nickname(msg: types.Message, state=FSMContext):
     text = msg.text
