@@ -11,7 +11,7 @@ from Text import OnlyText
 from Modules import Classes, Interface, Timer
 from aiogram.filters import StateFilter
 import logging
-logging.basicConfig(level=logging.INFO, filename="bot_log.log",filemode="w")
+logging.basicConfig(format='%(asctime)s - [%(levelname)s] - %(message)s', level=logging.DEBUG, filemode="w", filename="bot_log.log")
 router = Router()
 
 

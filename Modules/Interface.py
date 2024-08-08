@@ -9,7 +9,7 @@ from Text import OnlyText
 from Modules import Classes, Mechanic
 from Modules.Moving_Handler import Moving
 import logging
-logging.basicConfig(level=logging.INFO, filename="bot_log.log",filemode="w")
+logging.basicConfig(format='%(asctime)s - [%(levelname)s] - %(message)s', level=logging.DEBUG, filemode="w", filename="bot_log.log")
 router = Router()
 async def change_user_state(user_id: int, new_state):
     # Получаем контекст состояния для пользователя
@@ -52,8 +52,8 @@ async def unknown(msg: types.Message, state=FSMContext):
             enter = f"Ебать здарова\n\nТы находишся в секторе - [{player.x}; {player.y}]\nСектор принадлежит клану {sector.fraction.name}\nПостройка в секторе: {sector.building.name}"
             if player.fraction==sector.fraction: enter+=f"\nВойск в секторе: {len(sector.warriors)}\nОбщий показатель защиты: {sector.get_defense()}"
             if not (sector.building.building_type == "void"): enter += f"\nВладелец постройки: {sector.building.owner.name}"
-            enter += f"\n\nОсмотр твоего еблища дал понять что\n{player.name} - твоё имя\n{player.fraction.name} - Твоя группировка\n{player.power} - коэффициент пользы для клана\n{int(player.balance)} шекелей в кармане\n"
-            enter += f"\nТвой отряд: \n"
+            enter += f"\n\nОсмотр твоего еблища дал понять что\n{player.name} - твоё имя\n{player.fraction.name} - Твоя группировка\n{player.power} - коэффициент пользы для клана\n{int(player.balance)} шекелей в кармане\n{int(player.coins)} коинов с собой"
+            enter += f"\n\nТвой отряд: \n"
             if len(player.warriors)==0:
                 enter+= f"Никто)\n"
             else:
@@ -111,6 +111,7 @@ async def unknown(msg: types.Message, state=FSMContext):
         case "выебать ослика":
             await msg.answer("Под хлюпающие звуки и томное дыхание копытного, ты злачно кончил в ишака", reply_markup=OnlyText.keyboard)
         case _:
+            logging.info(f"{msg.from_user.id} - said - {msg.text}")
             await msg.answer("Чёта на неизвестном, попробуй кнопочки потыкать", reply_markup=OnlyText.keyboard)
 async def main_page(msg: types.Message):
     player = players[msg.from_user.id]

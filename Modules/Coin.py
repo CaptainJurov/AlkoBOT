@@ -3,7 +3,7 @@ import logging
 import threading
 import random
 from Modules import Classes
-logging.basicConfig(level=logging.INFO, filename="bot_log.log",filemode="w")
+logging.basicConfig(format='%(asctime)s - [%(levelname)s] - %(message)s', level=logging.DEBUG, filemode="w", filename="bot_log.log")
 
 class Coin:
     def __init__(self, map: Classes.Map):

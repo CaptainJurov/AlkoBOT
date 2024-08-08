@@ -5,7 +5,7 @@ import time
 import logging
 import aiogram
 
-logging.basicConfig(level=logging.INFO, filename="bot_log.log",filemode="w")
+logging.basicConfig(format='%(asctime)s - [%(levelname)s] - %(message)s', level=logging.DEBUG, filemode="w", filename="bot_log.log")
 class Warrior:
     def __init__(self, name: str, power: int, price: int, entity=None):
         self.name: str = name

@@ -10,7 +10,7 @@ from Modules.Interface import ChooseClan, main_page, change_user_state
 from aiogram.filters import StateFilter
 from aiogram.filters.base import Filter
 import logging
-logging.basicConfig(level=logging.INFO, filename="bot_log.log",filemode="w")
+logging.basicConfig(format='%(asctime)s - [%(levelname)s] - %(message)s', level=logging.DEBUG, filemode="w", filename="bot_log.log")
 
 router = Router()
 class CustomFilter(Filter):

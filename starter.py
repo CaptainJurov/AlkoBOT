@@ -9,7 +9,7 @@ import config
 from Hip import dp, bot, players
 from aiogram.fsm.context import FSMContext
 from Modules import Interface, Clan_Handler, Building_Handler, Interact_Handler, Moving_Handler, Casino, Bank
-logging.basicConfig(level=logging.INFO, filename="bot_log.log",filemode="w")
+logging.basicConfig(format='%(asctime)s - [%(levelname)s] - %(message)s', level=logging.DEBUG, filemode="w", filename="bot_log.log")
 class SomeMiddleware(aiogram.BaseMiddleware):
     async def __call__(
         self,
@@ -42,6 +42,7 @@ async def main():
     dp.include_router(Bank.router)
     dp.include_router(Casino.router)
     dp.include_router(Moving_Handler.router)
+
     await dp.start_polling(bot)
 if __name__ == "__main__":
     asyncio.run(main())

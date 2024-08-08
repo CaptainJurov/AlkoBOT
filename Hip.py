@@ -3,6 +3,7 @@ from aiogram import Bot, Dispatcher
 import aiogram
 from aiogram.fsm.storage.memory import MemoryStorage
 from Modules import Classes, Timer, Coin
+
 print("loaded")
 Clock = Timer.Timer()
 glob_room = Classes.Room()
