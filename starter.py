@@ -4,10 +4,12 @@ from typing import Callable, Dict, Any, Awaitable
 import Hip
 from aiogram.types import TelegramObject
 import time
+import logging
 import config
 from Hip import dp, bot, players
 from aiogram.fsm.context import FSMContext
 from Modules import Interface, Clan_Handler, Building_Handler, Interact_Handler, Moving_Handler, Casino, Bank
+logging.basicConfig(level=logging.INFO, filename="bot_log.log",filemode="w")
 class SomeMiddleware(aiogram.BaseMiddleware):
     async def __call__(
         self,

@@ -2,7 +2,7 @@ import asyncio
 import random
 import threading
 import time
-
+import logging
 import aiogram
 
 
@@ -25,12 +25,13 @@ class Warrior:
 
 class Fraction:
     def __init__(self, name: str, x: int, y: int, player=None):
+        logging.info(f"created new clan {name} on {x} {y}, {player=}")
         self.name: str = name
         self.x: int = x
         self.y: int = y
         self.open: bool = True
         self.warriors_types: list[Warrior] = [Warrior("Рядовой", 1, 10000), Warrior("Сержант", 3, 25000)]
-        self.warriors = {self.warriors_types[0]: 10, self.warriors_types[1]: 0}
+        self.warriors = {self.warriors_types[0]: 1, self.warriors_types[1]: 1}
         self.owner: Player = player
         self.players: [Player] = []
         self.banned_players = {}
@@ -106,6 +107,7 @@ class Player:
         self.x += delta_x
         self.y += delta_y
 
+
     def change_playable(self, value: bool):
         self.playable = value
 
@@ -161,6 +163,7 @@ class Room:
         if user_id in self.room:
             self.room[user_id] += bet
         else:
+            logging.info(f"casic - append new user {user_id} {players[int(user_id)].name} bet - {bet}")
             self.room[user_id] = bet
         if len(self.room)==2:
             self.started = True
@@ -181,6 +184,7 @@ class Room:
             if choose <= cumul_num:
                 winner: Player = players[user_id]
                 winner.balance += total_cost
+                logging.info(f"{winner.user_id}, {winner.name} - won {total_cost}")
                 task = asyncio.create_task(bot.send_message(chat_id=int(user_id),
                                                       text=f"[Рулетка]\nНихуясебе, ты выиграл в рулетке {total_cost} шекелей, не пропей всё разом"))
 
@@ -283,6 +287,7 @@ class Map:
             for x in range(self.size_x):
                 if self.map[y][x].fraction == fraction:
                     self.map[y][x].fraction = self.fraction_list[0]
+        logging.info(f"{fraction.name} has been annihilated")
         self.fraction_list.remove(fraction)
 
     def count_sectors(self, fraction: Fraction) -> int:
@@ -296,8 +301,10 @@ class Map:
         return self.map[y][x]
 
     def create_clan(self, fraction: Fraction) -> Fraction:
+
         self.fraction_list.append(fraction)
         self.capture_sector(fraction, fraction.x, fraction.y)
         self.get_sector(fraction.y, fraction.x).build(
             Map.Sector.Building(f"База клана {fraction.name}", owner=fraction.owner, building_type="spawn"))
+        logging.info(f"{fraction.name} has been created")
         return fraction

@@ -1,5 +1,6 @@
 from Modules import Classes
 import Hip
+import logging
 def capture(player: Classes.Player, sector: Classes.Map.Sector):
     player_atk = player.total_power()+player.power
     sector_def = sector.get_defense()*sector.basic_def
@@ -8,6 +9,7 @@ def capture(player: Classes.Player, sector: Classes.Map.Sector):
     if sector_count==0:
         Hip.Map.capture_sector(player.fraction, player.x, player.y)
         player.balance+=1000
+        logging.info(f"{player.user_id}, {player.name} - captured sector {sector.x} {sector.y} and got 1000 shekelej")
         return True
     power_count_defender = player_atk/sector_count
     power_count_attacker = sector_def/player_count
@@ -24,6 +26,7 @@ def capture(player: Classes.Player, sector: Classes.Map.Sector):
         return True
     elif len(player.warriors)==0:
         player.x, player.y = player.fraction.getbase()
+        logging.info(f"{player.user_id}, {player.name} - died")
         Hip.bot.send_message(chat_id=player.user_id, text=f"Ебать, ты сдох\nВесь твой отряд кстати тоже\nТы перенесён на базу своего клана")
         return False
     else:

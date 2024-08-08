@@ -9,6 +9,7 @@ from Modules import Classes
 from Modules.Interface import ChooseClan, main_page, change_user_state
 from aiogram.filters import StateFilter
 from aiogram.filters.base import Filter
+import logging
 
 
 router = Router()
@@ -101,6 +102,7 @@ async def choosing_nickname(msg: types.Message, state=FSMContext):
         return False
     player = players[msg.from_user.id]
     player.name = text
+    logging.info(f"{player.user_id}, {player.name} - choosed clan {player.fraction.name}")
     await msg.answer("Ахуительно, теперь ты готов к адской дрочильне", reply_markup=OnlyText.keyboard)
     await state.clear()
 @router.message(aiogram.filters.StateFilter(ChooseClan.clan_page))
@@ -162,6 +164,7 @@ async def page_create(msg: types.Message, state=FSMContext):
                     frac = Map.create_clan(Classes.Fraction(msg.text, player.x, player.y, player=player))
                     player.fraction.kick_man(player)
                     player.fraction = frac
+                    logging.info(f"{player.user_id}, {player.name} - created clan {frac.name}")
                     await state.clear()
                     await msg.answer("Ух ты ж нихуя себе, поздравляю, дорогой, ты создал аж свою фракцию, скорее захватывай всё в округе и будь готов к защите", reply_markup=OnlyText.keyboard)
                 else:
@@ -210,6 +213,7 @@ async def banning(msg: types.Message, state=FSMContext):
     i: Classes.Player
     for i in player.fraction.players:
         if i.user_id == text or i.name == text:
+            logging.info(f"{player.user_id}, {player.name} - banned from clan {player.fraction.name} user {i.name} {i.user_id} ")
             player.fraction.kick_man(i)
             Hip.kicked.append(i.user_id)
             await bot.send_message(chat_id=i.user_id, text="Тебя забанили к хуям в клане, выбирай новый")
@@ -227,6 +231,7 @@ async def unbanning(msg: types.Message, state=FSMContext):
     for i in player.fraction.banned_players:
                     if player.fraction.banned_players[i].name==text:
                         unbanned = i
+                        logging.info(f"{player.user_id}, {player.name} - unban from clan {player.fraction.name} user {i.name} {i.user_id}")
                         await msg.answer("Чел разбанен", reply_markup=OnlyText.keyboard)
                         await state.clear()
                         player.fraction.unban(unbanned)
@@ -256,6 +261,7 @@ async def warrior_name(msg: types.Message, state=FSMContext):
         await main_page(msg)
         await state.clear()
     if len(msg.text)<50:
+        logging.info(f"{player.user_id}, {player.name} - renamed warrior {warrior.name} on {msg.text} in clan {player.fraction.name}")
         warrior.name = msg.text
         await msg.answer("Готово", reply_markup=OnlyText.keyboard)
         await state.clear()
@@ -269,6 +275,7 @@ async def clan_kick(msg: types.Message, state=FSMContext):
     for i in player.fraction.players:
             if i.user_id==text or i.name==text:
                 player.fraction.kick_man(i)
+                logging.info(f"{player.user_id}, {player.name} - kicked from clan {player.fraction.name} user {i.name} {i.user_id}")
                 Hip.kicked.append(i.user_id)
                 await bot.send_message(chat_id=i.user_id, text="Тебя кикнули к хуям с клана, выбирай новый")
                 await msg.answer("Долбаёб успешно получил по еблу", reply_markup=OnlyText.keyboard)

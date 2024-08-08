@@ -1,6 +1,6 @@
 import asyncio
 import time
-
+import logging
 import aiogram
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
@@ -47,6 +47,9 @@ async def moving_choose(msg: types.Message, state=FSMContext):
     player.playable = True
     player.move(delta_x=direct[0], delta_y=direct[1])
     sector = Map.get_sector(player.x, player.y)
+    player.x = sector.x
+    player.y = sector.y
+    logging.info(f"{player.user_id}, {player.name} - moved on [{sector.x};{sector.y}]")
     enter = f"Ты пришел в сектор [{sector.x}; {sector.y}]\nСектор принадлежит клану {sector.fraction.name}\nПостройка в секторе: {sector.building.name}"
     if not(sector.building.building_type=="void"): enter+=f"\nВладелец постройки: {sector.building.owner.name}"
     await msg.answer(enter, reply_markup=OnlyText.keyboard)

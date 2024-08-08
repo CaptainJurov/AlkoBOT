@@ -10,6 +10,7 @@ from Hip import bot, Map, players
 from Text import OnlyText
 from Modules import Classes, Interface, Timer
 from aiogram.filters import StateFilter
+import logging
 
 router = Router()
 
@@ -17,6 +18,7 @@ router = Router()
 
 def award_winner(user_id: int, total_cost: int) -> Classes.Player:
     player: Classes.Player = players[user_id]
+    logging.info(f"{player.user_id}, {player.name} - winned on casino {total_cost} shekelej")
     player.balance += total_cost
     asyncio.run(bot.send_message(chat_id=user_id, text=f"Всё заебок, твоя ставка стрельнула и ты выиграл {total_cost:,} шекелей, не пропей всё разом"))
     return player
@@ -84,6 +86,7 @@ async def casic_bet(msg: types.Message, state=FSMContext):
         case "Global":
             player.balance-=bet
             sector.building.owner.balance+=int(bet)*0.5
+            logging.info(f"{player.user_id}, {player.name} - casino - global - bet {bet}")
             await msg.answer("Ставка сделана", reply_markup=OnlyText.keyboard)
             await state.clear()
             await Hip.glob_room.append_user(user_id=msg.from_user.id, bet=bet, bot=bot, players=players)
@@ -91,6 +94,7 @@ async def casic_bet(msg: types.Message, state=FSMContext):
         case "Local":
             player.balance-=bet
             sector.building.owner.balance += int(bet) * 0.5
+            logging.info(f"{player.user_id}, {player.name} - casino - local - bet {bet}")
             await msg.answer("Ставка сделана", reply_markup=OnlyText.keyboard)
             await state.clear()
             await sector.building.room.append_user(msg.from_user.id, bet=bet, bot=bot, players=players)

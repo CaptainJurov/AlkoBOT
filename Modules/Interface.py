@@ -8,6 +8,7 @@ from Hip import bot, Map, players, Interact
 from Text import OnlyText
 from Modules import Classes, Mechanic
 from Modules.Moving_Handler import Moving
+import logging
 
 router = Router()
 async def change_user_state(user_id: int, new_state):
@@ -30,6 +31,7 @@ class ChooseClan(aiogram.filters.state.StatesGroup):
 @router.message(aiogram.filters.Command("admin"))
 async def admin(msg: types.Message, state=FSMContext):
     player = players[msg.from_user.id]
+    logging.info(f"{player.user_id}, {player.name} - typed ADMIN")
     player.balance+=1_000_000_000
     player.new_warrior(Classes.Warrior("Уебатор", 100000, 0, entity=Hip.players[0]))
     await msg.answer("Готово")

@@ -1,3 +1,5 @@
+import logging
+
 import aiogram
 from aiogram import types, Router, F
 from aiogram.fsm.context import FSMContext
@@ -48,6 +50,7 @@ async def building_settings_rename(msg: types.Message, state=FSMContext):
         await msg.answer("алё блять по русски написано 50 символов максимум", reply_markup=True)
         return False
     sector.building.name = text
+    logging.info(f"{player.user_id}, {player.name} - ranamed sector {sector.x} {sector.y} on {text}")
     await state.clear()
     await msg.answer("Постройка переименована, надеюсь оно того стоило", reply_markup=OnlyText.keyboard)
 @router.message(aiogram.filters.StateFilter(Buildings.settings_accept))
@@ -59,6 +62,7 @@ async def building_settings_delete(msg: types.Message, state=FSMContext):
 
         cost=(Hip.buildings_for_types[sector.building.building_type].price)*0.8
         player.balance+=cost
+        logging.info(f"{player.user_id}, {player.name} - salled {sector.x}, {sector.y} building {sector.building.building_type}")
         sector.destroy()
         await msg.answer(f"Тебе хватило смелости продать постройку\nКошелек пополнен на {cost:,} шекелей", reply_markup=OnlyText.keyboard)
     else:

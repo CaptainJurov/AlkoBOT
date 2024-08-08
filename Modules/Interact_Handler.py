@@ -14,6 +14,7 @@ from Modules.Casino import Casino
 from Modules.Interface import main_page
 from Modules import Classes, Mechanic, Bank
 from aiogram.filters import StateFilter
+import logging
 
 router = Router()
 
@@ -38,6 +39,7 @@ async def inter_choose_warriors(msg: types.Message, state=FSMContext):
         await msg.answer("Солдат не найден(Отряд не заметил потери бойца)", reply_markup=OnlyText.keyboard)
         await state.clear()
     else:
+        logging.info(f"{player.user_id} - {player.name} - added warrior on sector {sector.x} {sector.y}")
         await msg.answer("Родина-клан гордится вами\n", reply_markup=OnlyText.keyboard)
         await state.clear()
 
@@ -83,10 +85,6 @@ async def inter_choose(msg: types.Message, state=FSMContext):
                 kb.append([types.KeyboardButton(text=f"{i.name}")])
             text_to_send+=f"Ассортимент:\n{Mechanic.get_shop(sector)}"
             #kb = [[types.KeyboardButton(text=)]]
-        if building_type=="tavern" or building_type=="bank":
-            await msg.answer("coming soon")
-            await state.clear()
-            return False
         if building_type=="work":
             kb = [[types.KeyboardButton(text="Работать")], [types.KeyboardButton(text="Сьебаться в страхе")]]
         if building_type=="warriors":

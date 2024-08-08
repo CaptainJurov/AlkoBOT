@@ -1,4 +1,5 @@
 import asyncio
+import logging
 import threading
 import random
 from Modules import Classes
@@ -19,6 +20,7 @@ class Coin:
         self.course.append(int(self.political_correct()+course_delta))
         if self.course[-1]<100:
             self.course[-1]=1000
+        logging.info(f"COIN - {int(self.political_correct()+course_delta)}")
         self.timer = threading.Timer(self.kd_timer, self.update_course)
         self.timer.start()
 
