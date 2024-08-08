@@ -107,7 +107,7 @@ async def choosing_nickname(msg: types.Message, state=FSMContext):
     await state.clear()
 @router.message(aiogram.filters.StateFilter(ChooseClan.clan_page))
 async def page(msg: types.Message, state=FSMContext):
-    if msg.text=="Создать свой клан[1млрд шек.]":
+    if msg.text=="Создать свой клан[1 лям шек.]":
         player = players[msg.from_user.id]
         if player.balance>=1_000_000_000:
             sector = Map.get_sector(player.x, player.y)

@@ -91,7 +91,7 @@ async def unknown(msg: types.Message, state=FSMContext):
             await state.set_state(ChooseClan.clan_page)
             kb = []
             if player.fraction.owner!=player:
-                kb.append([types.KeyboardButton(text="Создать свой клан[1млрд шек.]")])
+                kb.append([types.KeyboardButton(text="Создать свой клан[1 лям шек.]")])
             if player==player.fraction.owner:
                 kb.append([types.KeyboardButton(text="Управление")])
             kb.append( [types.KeyboardButton(text="Ничего")])

@@ -25,14 +25,13 @@ class Building:
         self.type: str = type
         self.price: int = price
 buildings = {
-    "Завод" :Building("Завод", "work", 1_000_000),
-    "Магазин": Building("Магазин", "shop", 1_000_000),
-    "Банк": Building("Банк", "bank", 50_000_000),
-    "Шахта": Building("Шахта", "mine", 25_000_000),
-    "Казино": Building("Казино", "casino", 100_000_000),
-    "Дорога": Building("Дорога", "road", 100_000),
-    "Призывной пункт": Building("Призывной пункт", "warriors", 100_000_000),
-    "Бесполезная постройка": Building("Фонтан", "useless", 1_000_000)
+    "Завод" :Building("Завод", "work", 100_000),
+    "Магазин": Building("Магазин", "shop", 10_000),
+    "Банк": Building("Банк", "bank", 5000000),
+    "Казино": Building("Казино", "casino", 1_000_000),
+    "Дорога": Building("Дорога", "road", 10000),
+    "Призывной пункт": Building("Призывной пункт", "warriors", 100_000),
+    "Бесполезная постройка": Building("Фонтан", "useless", 10_000)
 }
 
 buildings_for_types = {}
